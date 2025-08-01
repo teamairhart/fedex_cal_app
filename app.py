@@ -8,20 +8,6 @@ import pandas as pd
 # ---------- PAGE CONFIG ----------
 st.set_page_config(page_title="FedEx Schedule to Calendar", layout="wide")
 
-# ---------- FIXED BACKGROUND IMAGE ----------
-page_bg_img = """
-<style>
-[data-testid="stAppViewContainer"] {
-    background-image: url("https://upload.wikimedia.org/wikipedia/commons/5/55/FedEx_Express_Boeing_767-300F_N101FE.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
-</style>
-"""
-st.markdown(page_bg_img, unsafe_allow_html=True)
-
 # ---------- TITLE ----------
 st.markdown("<h1 style='text-align: center; color: #4D148C;'>📅 FedEx Training Schedule → iCalendar (.ics)</h1>", unsafe_allow_html=True)
 
@@ -29,10 +15,9 @@ st.markdown("<h1 style='text-align: center; color: #4D148C;'>📅 FedEx Training
 st.markdown("""
 ### ✈️ How to Use
 1️⃣ Go to your FedEx schedule webpage.  
-2️⃣ Copy the entire schedule (Ctrl+A → Ctrl+C).  
-3️⃣ Paste it into a `.txt` file (e.g., `schedule.txt`).  
-4️⃣ Upload the `.txt` file below.  
-5️⃣ Download the generated `.ics` file to import into your calendar.
+2️⃣ **Ctrl+A → Ctrl+C** to copy the entire schedule.  
+3️⃣ Paste it below OR upload a `.txt` file.  
+4️⃣ Scroll down to preview and download your `.ics` calendar file.
 """)
 
 st.divider()
@@ -83,17 +68,15 @@ def parse_schedule(text):
         activity = main_row[4] if main_row else "Training"
         main_row_text = next((l for l in lines if main_row and main_row[2] in l and main_row[3] in l), None)
 
+        # ✅ FIXED LOCATION EXTRACTION
         location = ""
         if main_row_text:
-            parts = main_row_text.split()
-            for idx, p in enumerate(parts):
-                if p == activity.split()[0]:
-                    after_activity = parts[idx + 1:]
-                    break
-            after_activity_clean = [p for p in after_activity if "Instr" not in p and "JONATHAN" not in p and "AIRHART" not in p]
-            if after_activity_clean:
-                location = after_activity_clean[-1].split("/")[-1]
+            # Look specifically for simulator codes like B76FPT1, B75S1, etc.
+            match = re.search(r"\bB\d{2}[A-Z0-9]+\b", main_row_text)
+            if match:
+                location = match.group(0)
 
+        # Crew notes (CA, FO, SUPPORT)
         crew_notes = []
         if main_row_text:
             start_idx = lines.index(main_row_text) + 1
@@ -125,21 +108,34 @@ def generate_ics(events):
     filename = f"training_schedule_{month_str}.ics"
     return filename, cal
 
-# ---------- UPLOAD ----------
-uploaded_file = st.file_uploader("📂 Upload your schedule (.txt)", type=["txt"])
+# ---------- INPUT SECTION ----------
+st.markdown("### 📋 Paste Your Schedule OR Upload a File")
 
-if uploaded_file:
-    text = uploaded_file.read().decode("utf-8")
-    events = parse_schedule(text)
+# Text area for pasting
+pasted_text = st.text_area("📌 Paste schedule here (Ctrl+A → Ctrl+C from webpage)", height=300)
+
+# Optional file upload
+uploaded_file = st.file_uploader("📂 Or upload a schedule (.txt)", type=["txt"])
+
+# Determine which input to use
+schedule_text = ""
+if pasted_text.strip():
+    schedule_text = pasted_text.strip()
+elif uploaded_file:
+    schedule_text = uploaded_file.read().decode("utf-8")
+
+# ---------- PARSE + PREVIEW ----------
+if schedule_text:
+    events = parse_schedule(schedule_text)
 
     if events:
         st.success(f"✅ Found {len(events)} event blocks!")
 
-        # Show table
+        # Show table of events
         df = pd.DataFrame(events, columns=["Activity", "Date", "Start", "End", "Location", "Crew"])
         st.dataframe(df[["Activity", "Date", "Start", "End", "Location"]])
 
-        # Preview first event
+        # Show first event preview
         first = events[0]
         st.markdown(f"""
         ### 📅 First Event Preview
@@ -165,6 +161,6 @@ if uploaded_file:
             type="primary"
         )
     else:
-        st.error("❌ No valid events found.")
+        st.error("❌ No valid events found. Please check your pasted text.")
 else:
-    st.info("⬆️ Upload a `.txt` schedule to get started.")
+    st.info("⬆️ Paste your schedule above or upload a `.txt` file to continue.")
