@@ -1,0 +1,14 @@
+# Ignore personal schedule files
+schedule.txt
+training_schedule_*.ics
+
+# Ignore Python environment and cache
+.venv/
+__pycache__/
+*.pyc
+
+# Ignore Streamlit configuration (optional)
+.streamlit/
+
+# Ignore macOS system files
+.DS_Store
