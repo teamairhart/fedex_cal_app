@@ -2,3 +2,4 @@ ics
 pandas
 streamlit
 flask
+gunicorn

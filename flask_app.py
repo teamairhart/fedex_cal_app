@@ -59,14 +59,8 @@ def preview_schedule():
         # Parse exclude names
         exclude_list = [name.strip() for name in exclude_names.split(',') if name.strip()]
         
-        # Debug output
-        print(f"DEBUG: schedule_text length: {len(schedule_text)}")
-        print(f"DEBUG: exclude_list: {exclude_list}")
-        print(f"DEBUG: First 200 chars of schedule: {repr(schedule_text[:200])}")
-        
         # Parse schedule
         events = parse_schedule(schedule_text, exclude_list)
-        print(f"DEBUG: Found {len(events)} events")
         
         if not events:
             return jsonify({'error': 'No valid events found in the schedule'}), 400
@@ -93,4 +87,6 @@ def preview_schedule():
         return jsonify({'error': f'Error parsing schedule: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    import os
+    port = int(os.environ.get('PORT', 5001))
+    app.run(debug=False, host='0.0.0.0', port=port)

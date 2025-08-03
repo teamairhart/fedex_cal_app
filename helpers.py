@@ -13,8 +13,9 @@ def parse_datetime(date_str: str, time_str: str) -> datetime:
 def preprocess_schedule_text(text: str) -> str:
     """Extract and normalize schedule data from various input formats."""
     
-    print(f"DEBUG: Original text length: {len(text)}")
-    print(f"DEBUG: First 200 chars: {repr(text[:200])}")
+    # Debug output for development
+    # print(f"DEBUG: Original text length: {len(text)}")
+    # print(f"DEBUG: First 200 chars: {repr(text[:200])}")
     
     # If the text contains webpage content, try to extract just the schedule part
     lines = text.splitlines()
@@ -30,7 +31,7 @@ def preprocess_schedule_text(text: str) -> str:
             re.search(r'^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)$', line_stripped)):
             if schedule_start == -1:
                 schedule_start = i
-                print(f"DEBUG: Found schedule start at line {i}: {repr(line_stripped)}")
+                # print(f"DEBUG: Found schedule start at line {i}: {repr(line_stripped)}")
         
         # Look for patterns that indicate schedule end (common webpage footer content)
         if any(phrase in line_stripped.lower() for phrase in [
@@ -38,15 +39,15 @@ def preprocess_schedule_text(text: str) -> str:
             'sitemap', 'all rights reserved', 'fedex.com', 'terms of use'
         ]):
             schedule_end = i
-            print(f"DEBUG: Found schedule end at line {i}: {repr(line_stripped)}")
+            # print(f"DEBUG: Found schedule end at line {i}: {repr(line_stripped)}")
             break
     
     if schedule_start != -1:
         schedule_lines = lines[schedule_start:schedule_end]
-        print(f"DEBUG: Extracted {len(schedule_lines)} lines from original {len(lines)} lines")
+        # print(f"DEBUG: Extracted {len(schedule_lines)} lines from original {len(lines)} lines")
     else:
         schedule_lines = lines
-        print("DEBUG: No schedule markers found, using all lines")
+        # print("DEBUG: No schedule markers found, using all lines")
     
     # Check if this looks like tabular format (all on one line per event)
     has_tabular_format = any(
@@ -54,7 +55,7 @@ def preprocess_schedule_text(text: str) -> str:
         for line in schedule_lines
     )
     
-    print(f"DEBUG: Detected tabular format: {has_tabular_format}")
+    # print(f"DEBUG: Detected tabular format: {has_tabular_format}")
     
     if has_tabular_format:
         # Convert tabular format to multi-line format
@@ -72,7 +73,7 @@ def preprocess_schedule_text(text: str) -> str:
                 
             # Check if this is a main schedule line (starts with day)
             if re.search(r'^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\t\d{2}[A-Z]{3}\d{2}', line):
-                print(f"DEBUG: Processing tabular line: {repr(line)}")
+                # print(f"DEBUG: Processing tabular line: {repr(line)}")
                 
                 # Split by tabs to get fields
                 fields = line.split('\t')
@@ -109,7 +110,7 @@ def preprocess_schedule_text(text: str) -> str:
                             if name and name.strip():
                                 processed_lines.append(name.strip())
                     
-                    print(f"DEBUG: Added: {day}, {date}, {time}, {activity}")
+                    # print(f"DEBUG: Added: {day}, {date}, {time}, {activity}")
             
             elif '\t' in line:
                 # This might be crew information on subsequent lines
@@ -121,20 +122,20 @@ def preprocess_schedule_text(text: str) -> str:
                     if role and name:
                         processed_lines.append(role.upper())
                         processed_lines.append(name)
-                        print(f"DEBUG: Added crew: {role} - {name}")
+                        # print(f"DEBUG: Added crew: {role} - {name}")
             
             elif line and not re.search(r'^\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', line):
                 # Regular line, add as-is
                 processed_lines.append(line)
         
         result = '\n'.join(processed_lines)
-        print(f"DEBUG: Converted tabular to multi-line format")
-        print(f"DEBUG: Final result (first 500 chars): {repr(result[:500])}")
+        # print(f"DEBUG: Converted tabular to multi-line format")
+        # print(f"DEBUG: Final result (first 500 chars): {repr(result[:500])}")
         return result
     else:
         # Already in multi-line format or needs no conversion
         result = '\n'.join(line.strip() for line in schedule_lines if line.strip())
-        print(f"DEBUG: Using multi-line format as-is")
+        # print(f"DEBUG: Using multi-line format as-is")
         return result
 
 def parse_schedule(text: str, exclude_names: Optional[List[str]] = None) -> List[Tuple[str, str, str, str, str, str]]:
@@ -144,7 +145,7 @@ def parse_schedule(text: str, exclude_names: Optional[List[str]] = None) -> List
     
     # Preprocess the input to handle different formats
     processed_text = preprocess_schedule_text(text)
-    print(f"DEBUG: Preprocessed text (first 500 chars): {repr(processed_text[:500])}")
+    # print(f"DEBUG: Preprocessed text (first 500 chars): {repr(processed_text[:500])}")
     
     lines = [line.strip() for line in processed_text.splitlines() if line.strip()]
     
@@ -276,9 +277,9 @@ def parse_schedule(text: str, exclude_names: Optional[List[str]] = None) -> List
         else:
             i += 1
     
-    print(f"DEBUG: Parsed {len(events)} events")
-    for i, event in enumerate(events):
-        print(f"DEBUG: Event {i+1}: {event[0]} on {event[1]} from {event[2]} to {event[3]}")
+    # print(f"DEBUG: Parsed {len(events)} events")
+    # for i, event in enumerate(events):
+    #     print(f"DEBUG: Event {i+1}: {event[0]} on {event[1]} from {event[2]} to {event[3]}")
     
     return events
 
