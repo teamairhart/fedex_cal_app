@@ -23,10 +23,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run basic test
+      - name: Run parser tests
         run: |
-          python -c "import flask; print('✅ Flask app loads correctly!')"
+          pytest test_parser.py --maxfail=1 --disable-warnings -q
 
       - name: Trigger Render Deployment
+        if: success()  # ✅ Only deploy if tests pass
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
