@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FedEx Schedule to Calendar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%), 
+                        url('/static/images/Fedex_767.jpeg') center/cover no-repeat fixed;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4D148C;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .instructions {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #4D148C;
+        }
+        
+        .instructions h3 {
+            color: #4D148C;
+            margin-bottom: 15px;
+        }
+        
+        .step {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        textarea, input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #4D148C;
+        }
+        
+        textarea {
+            height: 200px;
+            resize: vertical;
+            font-family: monospace;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-preview {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-preview:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-download {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-download:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .preview-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .preview-section.active {
+            display: block;
+        }
+        
+        .event-count {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .event-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4D148C;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .event-title {
+            font-weight: 600;
+            color: #4D148C;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        
+        .event-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .crew-list {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #c62828;
+            margin: 20px 0;
+        }
+        
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2e7d32;
+            margin: 20px 0;
+        }
+        
+        .sidebar {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4D148C;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 FedEx Training Schedule → iCalendar (.ics)</h1>
+        
+        <div class="instructions">
+            <h3>✈️ How to Use</h3>
+            <div class="step">1️⃣ Go to your FedEx schedule webpage.</div>
+            <div class="step">2️⃣ <strong>Ctrl+A → Ctrl+C</strong> to copy the entire schedule.</div>
+            <div class="step">3️⃣ Paste it below.</div>
+            <div class="step">4️⃣ Preview your events and download your <code>.ics</code> calendar file.</div>
+        </div>
+        
+        <div class="sidebar">
+            <div class="form-group">
+                <label for="exclude_names">Put your name here <strong>(FIRST AND LAST)</strong> if you do not want it added to the 'Crew Notes'<br>(can also exclude any other names, if desired, comma-separated):</label>
+                <input type="text" id="exclude_names" name="exclude_names" value="Jonathan Airhart" placeholder="Your Name, Other Name, etc.">
+            </div>
+        </div>
+        
+        <form id="scheduleForm">
+            <div class="form-group">
+                <label for="schedule_text">📌 Paste schedule here (Ctrl+A → Ctrl+C from webpage)</label>
+                <textarea id="schedule_text" name="schedule_text" placeholder="Paste your FedEx schedule here..."></textarea>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn-preview" onclick="previewSchedule()">👁️ Preview Events</button>
+                <button type="button" class="btn-download" onclick="downloadCalendar()">📥 Download ICS File</button>
+            </div>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your schedule...</p>
+        </div>
+        
+        <div id="messages"></div>
+        
+        <div class="preview-section" id="previewSection">
+            <h3>📅 Event Preview</h3>
+            <div id="previewContent"></div>
+        </div>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('previewSection').classList.remove('active');
+            document.getElementById('messages').innerHTML = '';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        function showMessage(message, type = 'error') {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+        
+        function getFormData() {
+            const formData = new FormData();
+            const scheduleText = document.getElementById('schedule_text').value;
+            const excludeNames = document.getElementById('exclude_names').value;
+            
+            formData.append('schedule_text', scheduleText);
+            formData.append('exclude_names', excludeNames);
+            
+            return formData;
+        }
+        
+        async function previewSchedule() {
+            showLoading();
+            
+            try {
+                const formData = getFormData();
+                const response = await fetch('/preview', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                hideLoading();
+                
+                if (data.error) {
+                    showMessage(data.error, 'error');
+                    return;
+                }
+                
+                displayPreview(data);
+                
+            } catch (error) {
+                hideLoading();
+                showMessage('Error connecting to server. Please try again.', 'error');
+            }
+        }
+        
+        function displayPreview(data) {
+            const previewContent = document.getElementById('previewContent');
+            const previewSection = document.getElementById('previewSection');
+            
+            let html = `<div class="event-count">✅ Found ${data.event_count} event blocks!</div>`;
+            
+            data.events.forEach(event => {
+                html += `
+                    <div class="event-card">
+                        <div class="event-title">${event.activity}</div>
+                        <div class="event-details">
+                            <strong>Date:</strong> ${event.date} | 
+                            <strong>Time:</strong> ${event.start} → ${event.end} | 
+                            <strong>Location:</strong> ${event.location}
+                        </div>
+                        ${event.crew.length > 0 ? `
+                            <div class="crew-list">
+                                <strong>Crew:</strong><br>
+                                ${event.crew.join('<br>')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            if (data.event_count > 5) {
+                html += `<p><em>Showing first 5 events. Total: ${data.event_count} events.</em></p>`;
+            }
+            
+            previewContent.innerHTML = html;
+            previewSection.classList.add('active');
+            showMessage(`Successfully parsed ${data.event_count} events!`, 'success');
+        }
+        
+        async function downloadCalendar() {
+            showLoading();
+            
+            try {
+                const formData = getFormData();
+                const response = await fetch('/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                hideLoading();
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'schedule.ics';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    showMessage('Calendar file downloaded successfully!', 'success');
+                } else {
+                    const data = await response.json();
+                    showMessage(data.error || 'Failed to generate calendar file', 'error');
+                }
+                
+            } catch (error) {
+                hideLoading();
+                showMessage('Error connecting to server. Please try again.', 'error');
+            }
+        }
+        
+        // Clear messages when user starts typing
+        document.getElementById('schedule_text').addEventListener('input', function(e) {
+            if (e.target.value.trim()) {
+                document.getElementById('messages').innerHTML = '';
+            }
+        });
+    </script>
+</body>
+</html>
