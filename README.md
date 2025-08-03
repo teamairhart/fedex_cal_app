@@ -1,43 +1,70 @@
 
 # 📅 FedEx Training Schedule → iCalendar (.ics)
 
-Easily convert your FedEx training schedule into an `.ics` calendar file for import into Apple Calendar, Outlook, or Google Calendar.
+**Modern web application** that converts your FedEx training schedule into an `.ics` calendar file for import into Apple Calendar, Outlook, or Google Calendar.
 
-🚀 **Try It Online:**  
-👉 [Click here to open the app](https://teamairhart-fedex-cal-app.streamlit.app)
+## ✈️ How to Use
+
+1. **Go to your FedEx schedule webpage** (VIPS Training Schedule)
+2. **Copy the entire page** with `Ctrl+A` → `Ctrl+C` (or `Cmd+A` → `Cmd+C` on Mac)
+3. **Paste it into the app** - no need to save files or clean up the data!
+4. **Preview your events** and download your `.ics` calendar file
+
+The app intelligently extracts just the schedule data from the full webpage, so you can copy/paste everything without worry!
 
 ---
 
+## 🚀 Web Application
 
-## 📌 Setup
+### Quick Start
+```bash
+# Clone the repository
+git clone https://github.com/teamairhart/fedex_cal_app.git
+cd fedex_cal_app
 
-1. Clone this repository or download the files.
-2. Create a virtual environment:
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-3. Install dependencies:
+# Install dependencies
+pip install -r requirements.txt
 
-    pip install -r requirements.txt
+# Run the Flask app
+python flask_app.py
+```
 
+Then open your browser to `http://localhost:5001`
 
+### Features ✨
+- **🎯 Smart Copy/Paste**: Handles full webpage content or just schedule data
+- **📱 Modern Interface**: Responsive design with FedEx 767 background
+- **👀 Live Preview**: See your events before downloading
+- **🔧 Crew Filtering**: Exclude your name from crew notes automatically
+- **📅 Perfect Formatting**: Groups BRF→Activity→DBRF into single events
+- **🕐 Time Zone Ready**: Always outputs in Central Time (America/Chicago)
+- **📍 Location Extraction**: Pulls simulator/facility codes (B76FPT1, etc.)
 
-📌 Usage
+### Also Included
+- **Command Line Version**: `python main.py` (requires `schedule.txt` file)
+- **Streamlit Version**: `streamlit run app.py` for simple web interface
 
-Paste your copied schedule text into schedule.txt.
+---
 
-Run the script:
+## 🛠️ Technical Details
 
-python main.py
+### Supported Formats
+- **Tabular Format**: Direct copy from VIPS training schedule webpage
+- **Multi-line Format**: Clean schedule data with each field on separate lines
+- **Full Webpage**: Copy entire VIPS page with navigation, headers, etc.
 
-A file named training_schedule_YYYY-MM.ics will be created.
+### Event Processing
+- Groups training blocks (BRF → Main Activity → DBRF) into single calendar events
+- Extracts activity types: AST 1, AST 2, AST 3, ASV, CMT2, BETA SIM, LOE, PV, etc.
+- Pulls facility/simulator codes: B76FPT1, B75S1, B76S2, etc.
+- Processes crew roles: CA, FO, INSTR, SUPPORT, DEVELOPER, FO-1, FO-2
+- Filters excluded names from crew notes (put your name to exclude yourself)
 
-Open the .ics file to import events into your calendar.
-
-📌 Features
-✅ Groups BRF→DBRF blocks into single events
-✅ Extracts main activity (e.g., AST 1, LOE)
-✅ Extracts correct facility code (e.g., B76FPT1)
-✅ Adds crew names in the event description
-✅ Always outputs times in Central Time (America/Chicago)
+### Output
+- **Filename**: `training_schedule_YYYY-MM.ics`
+- **Time Zone**: America/Chicago (Central Time)
+- **Compatibility**: Works with Apple Calendar, Google Calendar, Outlook, and most calendar apps
