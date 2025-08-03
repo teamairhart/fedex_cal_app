@@ -3,3 +3,4 @@ pandas
 streamlit
 flask
 gunicorn
+pytest
