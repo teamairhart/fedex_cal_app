@@ -49,13 +49,12 @@ def preprocess_schedule_text(text: str) -> str:
         schedule_lines = lines
         # print("DEBUG: No schedule markers found, using all lines")
     
-    # Check if this looks like tabular format (all on one line per event)
-    has_tabular_format = any(
-        re.search(r'(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d{2}[A-Z]{3}\d{2}\s+\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', line.strip())
-        for line in schedule_lines
-    )
+    # Check format types
+    has_tabular_format = any('\t' in line and re.search(r'(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\t\d{2}[A-Za-z]{3}\d{2}', line.strip()) for line in schedule_lines)
+    has_original_format = any(re.search(r'(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d{2}[A-Za-z]{3}\d{2}\s+\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', line.strip()) for line in schedule_lines)
     
     # print(f"DEBUG: Detected tabular format: {has_tabular_format}")
+    # print(f"DEBUG: Detected original format: {has_original_format}")
     
     if has_tabular_format:
         # Convert tabular format to multi-line format
@@ -131,6 +130,68 @@ def preprocess_schedule_text(text: str) -> str:
         result = '\n'.join(processed_lines)
         # print(f"DEBUG: Converted tabular to multi-line format")
         # print(f"DEBUG: Final result (first 500 chars): {repr(result[:500])}")
+        return result
+    elif has_original_format:
+        # Convert original single-line format to multi-line format
+        processed_lines = []
+        
+        for line in schedule_lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Check if this is a main schedule line (starts with day and has time)
+            if re.search(r'^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d{2}[A-Za-z]{3}\d{2}\s+\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', line):
+                # Extract components using the original regex patterns
+                day_date_match = re.search(r'^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+(\d{2}[A-Za-z]{3}\d{2})', line)
+                if day_date_match:
+                    day, date = day_date_match.groups()
+                    processed_lines.append(day)
+                    processed_lines.append(date)
+                    
+                    # Extract time pattern
+                    time_match = re.search(r'(\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L)', line)
+                    if time_match:
+                        processed_lines.append(time_match.group(1))
+                        
+                        # Extract activity (everything between time and crew roles)
+                        remaining = line[time_match.end():].strip()
+                        # Look for activity before any facility info or crew roles
+                        activity_match = re.search(r'^([A-Z][A-Z0-9\s]*?)(?:\s+(?:MEM|B\d{2}|Instr|CA|FO|SUPPORT))', remaining)
+                        if activity_match:
+                            activity = activity_match.group(1).strip()
+                            processed_lines.append(activity)
+                        else:
+                            # Fallback - take first few words
+                            words = remaining.split()
+                            if words:
+                                activity = ' '.join(words[:2])  # Take first 2 words as activity
+                                processed_lines.append(activity)
+            elif re.search(r'^\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', line):
+                # This is a continuation line with just time and activity (no day/date)
+                time_match = re.search(r'(\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L)', line)
+                if time_match:
+                    processed_lines.append(time_match.group(1))
+                    
+                    # Extract activity (everything between time and crew roles)
+                    remaining = line[time_match.end():].strip()
+                    # Look for activity before any facility info or crew roles
+                    activity_match = re.search(r'^([A-Z][A-Z0-9\s]*?)(?:\s+(?:MEM|B\d{2}|Instr|CA|FO|SUPPORT))', remaining)
+                    if activity_match:
+                        activity = activity_match.group(1).strip()
+                        processed_lines.append(activity)
+                    else:
+                        # Fallback - take first few words
+                        words = remaining.split()
+                        if words:
+                            activity = ' '.join(words[:2])  # Take first 2 words as activity
+                            processed_lines.append(activity)
+            else:
+                # Regular line (crew info, etc.)
+                processed_lines.append(line)
+        
+        result = '\n'.join(processed_lines)
+        # print(f"DEBUG: Converted original format to multi-line format")
         return result
     else:
         # Already in multi-line format or needs no conversion
