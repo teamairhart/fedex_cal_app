@@ -1,7 +1,7 @@
 
 # 📅 FedEx Training Schedule → iCalendar (.ics)
 
-**Modern web application** that converts your FedEx training schedule into an `.ics` calendar file for import into Apple Calendar, Outlook, or Google Calendar.  Go to https://teamairhart-fedex-cal-app.streamlit.app/
+**Modern web application** that converts your FedEx training schedule into an `.ics` calendar file for import into Apple Calendar, Outlook, or Google Calendar.  Go to https://fdx-cal-app.onrender.com/
 
 ## ✈️ How to Use
 
