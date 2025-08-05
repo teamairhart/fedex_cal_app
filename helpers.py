@@ -154,8 +154,9 @@ def preprocess_schedule_text(text: str) -> str:
                     if time_match:
                         processed_lines.append(time_match.group(1))
                         
-                        # Extract activity (everything between time and crew roles)
+                        # Extract activity and location from remaining text
                         remaining = line[time_match.end():].strip()
+                        
                         # Look for activity before any facility info or crew roles
                         activity_match = re.search(r'^([A-Z][A-Z0-9\s]*?)(?:\s+(?:MEM|B\d{2}|Instr|CA|FO|SUPPORT))', remaining)
                         if activity_match:
@@ -167,14 +168,20 @@ def preprocess_schedule_text(text: str) -> str:
                             if words:
                                 activity = ' '.join(words[:2])  # Take first 2 words as activity
                                 processed_lines.append(activity)
+                        
+                        # Extract location (B76FPT1, etc.)
+                        location_match = re.search(r'B\d{2}[A-Z0-9]+', remaining)
+                        if location_match:
+                            processed_lines.append(location_match.group())
             elif re.search(r'^\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', line):
                 # This is a continuation line with just time and activity (no day/date)
                 time_match = re.search(r'(\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L)', line)
                 if time_match:
                     processed_lines.append(time_match.group(1))
                     
-                    # Extract activity (everything between time and crew roles)
+                    # Extract activity and location from remaining text
                     remaining = line[time_match.end():].strip()
+                    
                     # Look for activity before any facility info or crew roles
                     activity_match = re.search(r'^([A-Z][A-Z0-9\s]*?)(?:\s+(?:MEM|B\d{2}|Instr|CA|FO|SUPPORT))', remaining)
                     if activity_match:
@@ -186,6 +193,11 @@ def preprocess_schedule_text(text: str) -> str:
                         if words:
                             activity = ' '.join(words[:2])  # Take first 2 words as activity
                             processed_lines.append(activity)
+                    
+                    # Extract location (B76FPT1, etc.)
+                    location_match = re.search(r'B\d{2}[A-Z0-9]+', remaining)
+                    if location_match:
+                        processed_lines.append(location_match.group())
             else:
                 # Regular line (crew info, etc.)
                 processed_lines.append(line)
