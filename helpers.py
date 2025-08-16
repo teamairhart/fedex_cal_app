@@ -422,80 +422,83 @@ def parse_schedule(text: str, exclude_names: Optional[List[str]] = None) -> List
             # Collect all events for this day
             day_events = []
             while i < len(lines) and lines[i] not in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] and not re.match(r'\d{2}[A-Za-z]{3}\d{2}', lines[i]):
-                    # Look for time pattern (e.g., 06:00L / 08:00L)
-                    if re.match(r'\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', lines[i]):
-                        time_parts = lines[i].split(' / ')
-                        start_time = time_parts[0].strip()
-                        end_time = time_parts[1].strip()
+                # Look for time pattern (e.g., 06:00L / 08:00L)
+                if re.match(r'\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', lines[i]):
+                    time_parts = lines[i].split(' / ')
+                    start_time = time_parts[0].strip()
+                    end_time = time_parts[1].strip()
+                    i += 1
+                    
+                    # Next line should be activity
+                    if i < len(lines):
+                        activity = lines[i].strip()
                         i += 1
                         
-                        # Next line should be activity
-                        if i < len(lines):
-                            activity = lines[i].strip()
-                            i += 1
+                        # Collect location if present (hybrid approach)
+                        location = ""
+                        # Look ahead for location (known locations first, then pattern detection)
+                        for j in range(i, min(i + 10, len(lines))):
+                            if j < len(lines):
+                                potential_location = lines[j].strip()
+                                if is_known_location(potential_location) or is_likely_location(potential_location):
+                                    location = potential_location
+                                    break
+                        
+                        # Collect crew members
+                        crew_notes = []
+                        temp_i = i
+                        while temp_i < len(lines) and not re.match(r'\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', lines[temp_i]) and lines[temp_i] not in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] and not re.match(r'\d{2}[A-Za-z]{3}\d{2}', lines[temp_i]):
+                            line = lines[temp_i].strip()
                             
-                            # Collect location if present (hybrid approach)
-                            location = ""
-                            # Look ahead for location (known locations first, then pattern detection)
-                            for j in range(i, min(i + 10, len(lines))):
-                                if j < len(lines):
-                                    potential_location = lines[j].strip()
-                                    if is_known_location(potential_location) or is_likely_location(potential_location):
-                                        location = potential_location
-                                        break
-                            
-                            # Collect crew members
-                            crew_notes = []
-                            temp_i = i
-                            while temp_i < len(lines) and not re.match(r'\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', lines[temp_i]) and lines[temp_i] not in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] and not re.match(r'\d{2}[A-Za-z]{3}\d{2}', lines[temp_i]):
-                                line = lines[temp_i].strip()
+                            # Skip location lines and activity names (hybrid approach)
+                            if (is_known_location(line) or is_likely_location(line) or 
+                                is_known_activity(line)):
+                                temp_i += 1
+                                continue
                                 
-                                # Skip location lines and activity names (hybrid approach)
-                                if (is_known_location(line) or is_likely_location(line) or 
-                                    is_known_activity(line)):
-                                    temp_i += 1
-                                    continue
-                                    
-                                # Check if it's a crew role line (hybrid approach)
-                                if is_crew_role_line(line):
-                                    # Get the name on the next line
-                                    if temp_i + 1 < len(lines):
-                                        name_line = lines[temp_i + 1].strip()
-                                        # Make sure it's not another time/day/activity/location line (hybrid approach)
-                                        if (not re.match(r'\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', name_line) and 
-                                            name_line not in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] and
-                                            not re.match(r'\d{2}[A-Za-z]{3}\d{2}', name_line) and
-                                            not is_known_location(name_line) and not is_likely_location(name_line) and
-                                            not is_known_activity(name_line) and not is_crew_role_line(name_line)):
-                                            
-                                            crew_entry = f"{line}: {name_line}"
-                                            # Filter out excluded names
-                                            if not any(name.upper() in crew_entry.upper() for name in exclude_names):
-                                                crew_notes.append(crew_entry)
-                                            temp_i += 2  # Skip both role and name lines
-                                        else:
-                                            # No name found, just add the role
-                                            if not any(name.upper() in line.upper() for name in exclude_names):
-                                                crew_notes.append(line)
-                                            temp_i += 1
+                            # Check if it's a crew role line (hybrid approach)
+                            if is_crew_role_line(line):
+                                # Get the name on the next line
+                                if temp_i + 1 < len(lines):
+                                    name_line = lines[temp_i + 1].strip()
+                                    # Make sure it's not another time/day/activity/location line (hybrid approach)
+                                    if (not re.match(r'\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L', name_line) and 
+                                        name_line not in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] and
+                                        not re.match(r'\d{2}[A-Za-z]{3}\d{2}', name_line) and
+                                        not is_known_location(name_line) and not is_likely_location(name_line) and
+                                        not is_known_activity(name_line) and not is_crew_role_line(name_line)):
+                                        
+                                        crew_entry = f"{line}: {name_line}"
+                                        # Filter out excluded names
+                                        if not any(name.upper() in crew_entry.upper() for name in exclude_names):
+                                            crew_notes.append(crew_entry)
+                                        temp_i += 2  # Skip both role and name lines
                                     else:
-                                        # No next line available, just add the role
+                                        # No name found, just add the role
                                         if not any(name.upper() in line.upper() for name in exclude_names):
                                             crew_notes.append(line)
                                         temp_i += 1
                                 else:
+                                    # No next line available, just add the role
+                                    if not any(name.upper() in line.upper() for name in exclude_names):
+                                        crew_notes.append(line)
                                     temp_i += 1
-                            
-                            day_events.append({
-                                'activity': activity,
-                                'date': current_date,
-                                'start_time': start_time,
-                                'end_time': end_time,
-                                'location': location,
-                                'crew': crew_notes
-                            })
-                    else:
-                        i += 1
+                            else:
+                                temp_i += 1
+                        
+                        day_events.append({
+                            'activity': activity,
+                            'date': current_date,
+                            'start_time': start_time,
+                            'end_time': end_time,
+                            'location': location,
+                            'crew': crew_notes
+                        })
+                        
+                        # CRITICAL: Update main loop counter to skip past crew lines
+                        i = temp_i
+                else:
+                    i += 1
                 
             # Group events into BRF -> DBRF blocks
             brf_block = []
