@@ -209,6 +209,7 @@ def is_crew_role(text: str) -> bool:
     known_roles = {
         'CA', 'FO', 'SUPPORT', 'INSTR', 'INSTRUCTOR', 'PILOT',
         'FO-1', 'FO-2', 'CA-1', 'CA-2', 'TRAINEE',
+        'FO 1', 'FO 2', 'CA 1', 'CA 2',  # Added space-separated versions
         'IIT', 'IIT Conductor', 'IIT Observer', 'DEVELOPER'
     }
     
@@ -220,6 +221,7 @@ def is_crew_role(text: str) -> bool:
     patterns = [
         r'^[A-Z]{2,6}$',          # CA, FO, INSTR, etc.
         r'^[A-Z]+-[A-Z0-9]+$',    # FO-1, CA-2, etc.
+        r'^[A-Z]+\s+[0-9]+$',     # FO 1, CA 2, etc.
         r'^IIT\s+\w+$',           # IIT Conductor, IIT Observer
     ]
     

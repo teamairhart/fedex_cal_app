@@ -80,7 +80,7 @@ def preview_schedule():
         return jsonify({
             'success': True,
             'event_count': len(events),
-            'events': formatted_events[:5]  # Show first 5 events
+            'events': formatted_events  # Show ALL events for troubleshooting
         })
         
     except Exception as e:
