@@ -500,8 +500,10 @@ def parse_schedule(text: str, exclude_names: Optional[List[str]] = None) -> List
                 else:
                     i += 1
                 
-            # Group events into BRF -> DBRF blocks
+            # Group events into BRF -> DBRF blocks and handle standalone events
             brf_block = []
+            processed_events = set()  # Track which events we've processed
+            
             for event in day_events:
                 if event['activity'] == 'BRF':
                     brf_block = [event]
@@ -525,6 +527,7 @@ def parse_schedule(text: str, exclude_names: Optional[List[str]] = None) -> List
                     all_crew = []
                     for e in brf_block:
                         all_crew.extend(e['crew'])
+                        processed_events.add(id(e))  # Mark as processed
                     # Remove duplicates while preserving order
                     unique_crew = []
                     for crew in all_crew:
@@ -535,8 +538,20 @@ def parse_schedule(text: str, exclude_names: Optional[List[str]] = None) -> List
                     brf_block = []
                 elif brf_block:
                     brf_block.append(event)
-            else:
-                i += 1
+            
+            # Handle standalone events (not part of BRF->DBRF blocks)
+            for event in day_events:
+                if (id(event) not in processed_events and 
+                    event['activity'] not in ['BRF', 'DBRF']):
+                    # This is a standalone event
+                    events.append((
+                        event['activity'], 
+                        event['date'], 
+                        event['start_time'], 
+                        event['end_time'], 
+                        event['location'], 
+                        '\n'.join(event['crew'])
+                    ))
         else:
             i += 1
     
