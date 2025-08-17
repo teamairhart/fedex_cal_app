@@ -31,7 +31,7 @@ try:
         schedule_text = file.read()
     
     # Parse with configurable excluded names
-    exclude_names = ["Jonathan", "Airhart"]  # Add your name here
+    exclude_names = []  # Add names to exclude here if needed
     events = parse_schedule(schedule_text, exclude_names)
     
     if not events:
