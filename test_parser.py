@@ -1,5 +1,5 @@
 import pytest
-from helpers import parse_schedule
+from helpers import parse_schedule, generate_ics
 
 def test_parse_schedule_basic():
     # A small sample schedule to test parsing (multi-line format)
@@ -48,3 +48,22 @@ DEAN TOMLINSON"""
     # ✅ Check crew contains both CA and FO
     assert "PAUL TIMMS" in crew
     assert "DEAN TOMLINSON" in crew
+
+def test_timezone_support():
+    """Test the new timezone support in generate_ics"""
+    sample_text = """Mon
+06Aug25
+07:00L / 08:00L
+AST 1
+B76FPT1"""
+
+    events = parse_schedule(sample_text, [])
+    assert len(events) == 1
+
+    # Test default timezone
+    filename, cal = generate_ics(events)
+    assert filename.endswith('.ics')
+    
+    # Test custom timezone
+    filename_utc, cal_utc = generate_ics(events, tz_str="UTC", export_utc=True)
+    assert filename_utc.endswith('.ics')
