@@ -10,6 +10,10 @@ from ics import Calendar, Event
 # ------------------------------
 DEFAULT_TZ = "America/Chicago"
 
+DAY_HEADER_RE = re.compile(r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)(day)?$", re.IGNORECASE)
+DATE_RE = re.compile(r"^\d{2}[A-Za-z]{3}\d{2}$")
+TIME_RANGE_RE = re.compile(r"^(\d{2}:\d{2}L)\s*/\s*(\d{2}:\d{2}L)$")
+
 # Expanded patterns for facility / simulator locations
 LOCATION_PATTERNS = [
     r"^B\d{2}[A-Z0-9]+$",           # B76S1, B75FPT1, etc.
@@ -31,10 +35,32 @@ KNOWN_ROLES = {
 # Utility helpers
 # ------------------------------
 
-def _norm_name(s: str) -> set:
-    """Normalize a name/entry to uppercase tokens (>=2 chars) for robust matching."""
-    tokens = re.findall(r"[A-Z]{2,}", s.upper())
-    return set(tokens)
+def _name_tokens(s: str) -> List[str]:
+    """Return uppercase alpha tokens for name matching."""
+    return re.findall(r"[A-Z]{2,}", s.upper())
+
+
+def _excluded_name_sets(exclude_names: List[str]) -> List[set[str]]:
+    return [set(tokens) for name in exclude_names if (tokens := _name_tokens(name))]
+
+
+def _matches_excluded_name(candidate: str, excluded_names: List[set[str]]) -> bool:
+    candidate_tokens = set(_name_tokens(candidate))
+    if not candidate_tokens:
+        return False
+    return any(excluded_name.issubset(candidate_tokens) for excluded_name in excluded_names)
+
+
+def is_day_header(text: str) -> bool:
+    return bool(text and DAY_HEADER_RE.match(text.strip()))
+
+
+def is_date_header(text: str) -> bool:
+    return bool(text and DATE_RE.match(text.strip()))
+
+
+def is_time_range(text: str) -> bool:
+    return bool(text and TIME_RANGE_RE.match(text.strip()))
 
 
 def is_location(text: str) -> bool:
@@ -78,51 +104,43 @@ def parse_schedule(text: str, exclude_names: Optional[List[str]] = None) -> List
         exclude_names = []
 
     lines = [line.strip() for line in text.splitlines() if line.strip()]
+    excluded_names = _excluded_name_sets(exclude_names)
     events = []
     i = 0
 
     while i < len(lines):
-        # Day label
-        if lines[i] in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']:
+        if is_day_header(lines[i]) and i + 1 < len(lines) and is_date_header(lines[i + 1]):
             i += 1
-            # Date like 06Aug25
-            if i < len(lines) and re.match(r'^\d{2}[A-Za-z]{3}\d{2}$', lines[i]):
-                date = lines[i]
-                i += 1
 
-                # Collect all time blocks until next day/date header
-                day_events = []
-                while (
-                    i < len(lines)
-                    and lines[i] not in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-                    and not re.match(r'^\d{2}[A-Za-z]{3}\d{2}$', lines[i])
-                ):
-                    if re.match(r'^\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L$', lines[i]):
-                        event, new_i = parse_single_event(lines, i, date, exclude_names)
-                        if event:
-                            day_events.append(event)
-                        i = new_i
-                    else:
-                        i += 1
+        if not is_date_header(lines[i]):
+            i += 1
+            continue
 
-                # Group BRF → main activity → DBRF
-                grouped_events = group_brf_dbrf_events(day_events)
-                events.extend(grouped_events)
+        date = lines[i]
+        i += 1
+
+        day_events = []
+        while i < len(lines) and not is_date_header(lines[i]) and not is_day_header(lines[i]):
+            if is_time_range(lines[i]):
+                event, new_i = parse_single_event(lines, i, date, excluded_names)
+                if event:
+                    day_events.append(event)
+                i = new_i
             else:
                 i += 1
-        else:
-            i += 1
+
+        events.extend(group_brf_dbrf_events(day_events))
 
     return events
 
 
 def parse_single_event(
-    lines: List[str], start_i: int, date: str, exclude_names: List[str]
+    lines: List[str], start_i: int, date: str, excluded_names: List[set[str]]
 ) -> Tuple[Optional[Tuple[str, str, str, str, str, List[str]]], int]:
     """Parse a single time block and return ((activity,date,start,end,location,crew_list), next_index)."""
     i = start_i
 
-    time_match = re.match(r'^(\d{2}:\d{2}L)\s*/\s*(\d{2}:\d{2}L)$', lines[i])
+    time_match = TIME_RANGE_RE.match(lines[i])
     if not time_match:
         return None, i + 1
 
@@ -138,13 +156,11 @@ def parse_single_event(
     location = ""
     crew_list: List[str] = []
 
-    ex_norm = _norm_name(" ".join(exclude_names))
-
     while (
         i < len(lines)
-        and not re.match(r'^\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L$', lines[i])
-        and lines[i] not in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        and not re.match(r'^\d{2}[A-Za-z]{3}\d{2}$', lines[i])
+        and not is_time_range(lines[i])
+        and not is_day_header(lines[i])
+        and not is_date_header(lines[i])
     ):
         line = lines[i].strip()
 
@@ -158,24 +174,35 @@ def parse_single_event(
             # Attempt to read a following name line
             if (
                 i < len(lines)
-                and not re.match(r'^\d{2}:\d{2}L\s*/\s*\d{2}:\d{2}L$', lines[i])
-                and lines[i] not in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-                and not re.match(r'^\d{2}[A-Za-z]{3}\d{2}$', lines[i])
+                and not is_time_range(lines[i])
+                and not is_day_header(lines[i])
+                and not is_date_header(lines[i])
                 and not is_location(lines[i])
                 and not is_crew_role(lines[i])
             ):
                 name = lines[i].strip()
                 crew_entry = f"{role}: {name}"
-                if _norm_name(crew_entry).isdisjoint(ex_norm):
+                if not _matches_excluded_name(name, excluded_names):
                     crew_list.append(crew_entry)
                 i += 1
             else:
-                if _norm_name(role).isdisjoint(ex_norm):
-                    crew_list.append(role)
+                crew_list.append(role)
         else:
             i += 1
 
     return (activity, date, start_time, end_time, location, crew_list), i
+
+
+def _activity_rank(event: Tuple[str, str, str, str, str, List[str]]) -> Tuple[int, int, int, int]:
+    activity, _, _, _, location, crew_list = event
+    activity_upper = activity.upper()
+    observerish = activity_upper.endswith(" OBS") or " OBS " in activity_upper
+    return (
+        0 if observerish else 1,
+        1 if location else 0,
+        len(crew_list),
+        1 if re.search(r"\d", activity_upper) else 0,
+    )
 
 
 def group_brf_dbrf_events(
@@ -191,28 +218,26 @@ def group_brf_dbrf_events(
     while i < len(events):
         activity, date, start_time, end_time, location, crew_list = events[i]
 
-        if activity == 'BRF':
-            main_activity = None
-            main_location = ""
+        if activity.upper() == 'BRF':
+            candidate_events: List[Tuple[str, str, str, str, str, List[str]]] = []
             all_crew = crew_list.copy()
             final_end_time = end_time
             j = i + 1
             while j < len(events):
                 next_activity, next_date, next_start, next_end, next_location, next_crew = events[j]
-                if next_activity == 'BRF' or next_date != date:
+                if next_activity.upper() == 'BRF' or next_date != date:
                     break
-                if next_activity != 'DBRF' and not main_activity:
-                    main_activity = next_activity
-                    if next_location:
-                        main_location = next_location
+                if next_activity.upper() != 'DBRF':
+                    candidate_events.append(events[j])
                 all_crew.extend(next_crew)
                 final_end_time = next_end
-                if next_activity == 'DBRF':
+                if next_activity.upper() == 'DBRF':
                     j += 1
                     break
                 j += 1
 
-            if main_activity:
+            if candidate_events:
+                main_activity, _, _, _, main_location, _ = max(candidate_events, key=_activity_rank)
                 # de-duplicate crews preserving order
                 uniq = []
                 for c in all_crew:

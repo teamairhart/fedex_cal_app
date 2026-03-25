@@ -1,53 +1,208 @@
-import pytest
 from helpers import parse_schedule, generate_ics
 
-def test_parse_schedule_basic():
-    # A small sample schedule to test parsing (multi-line format)
-    sample_text = """Thu
-28Aug25
-06:00L / 08:00L
+SAMPLE_WITH_DAY_HEADERS = """Tue
+07Apr26
+09:30L / 10:00L
+IIT BRF
+IIT
+JONATHAN AIRHART
+10:00L / 12:00L
 BRF
-INSTR
-JONATHAN AIRHART
 CA
-PAUL TIMMS
+JASON WILLIAMS
 FO
-DEAN TOMLINSON
-08:00L / 12:00L
-AST 1
-B76FPT1
+DENNIS HARRUP
 INSTR
+MATT WADE
+IIT Observer
 JONATHAN AIRHART
+12:00L / 16:00L
+IIT OPS 1 OBS
+IIT
+JONATHAN AIRHART
+12:00L / 16:00L
+OPS 1
+B76S5
 CA
-PAUL TIMMS
+JASON WILLIAMS
 FO
-DEAN TOMLINSON
-12:00L / 12:30L
+DENNIS HARRUP
+INSTR
+MATT WADE
+IIT Observer
+JONATHAN AIRHART
+16:00L / 16:30L
 DBRF
-INSTR
-JONATHAN AIRHART
 CA
-PAUL TIMMS
+JASON WILLIAMS
 FO
-DEAN TOMLINSON"""
+DENNIS HARRUP
+INSTR
+MATT WADE
+IIT Observer
+JONATHAN AIRHART
+Wed
+08Apr26
+09:30L / 10:00L
+IIT BRF
+IIT
+JONATHAN AIRHART
+10:00L / 12:00L
+BRF
+CA
+JASON WILLIAMS
+FO
+DENNIS HARRUP
+INSTR
+JOHN BOOKAS
+IIT Observer
+JONATHAN AIRHART
+12:00L / 16:00L
+OPS 2
+B76S5
+CA
+JASON WILLIAMS
+FO
+DENNIS HARRUP
+INSTR
+JOHN BOOKAS
+IIT Observer
+JONATHAN AIRHART
+12:00L / 16:00L
+IIT OPS 2 OBS
+IIT
+JONATHAN AIRHART
+16:00L / 16:30L
+DBRF
+CA
+JASON WILLIAMS
+FO
+DENNIS HARRUP
+INSTR
+JOHN BOOKAS
+IIT Observer
+JONATHAN AIRHART
+Thu"""
 
-    events = parse_schedule(sample_text, [])
 
-    # ✅ Ensure at least one event is parsed
+SAMPLE_WITHOUT_DAY_HEADERS = """07Apr26
+09:30L / 10:00L
+IIT BRF
+IIT
+JONATHAN AIRHART
+10:00L / 12:00L
+BRF
+CA
+JASON WILLIAMS
+FO
+DENNIS HARRUP
+INSTR
+MATT WADE
+IIT Observer
+JONATHAN AIRHART
+12:00L / 16:00L
+IIT OPS 1 OBS
+IIT
+JONATHAN AIRHART
+12:00L / 16:00L
+OPS 1
+B76S5
+CA
+JASON WILLIAMS
+FO
+DENNIS HARRUP
+INSTR
+MATT WADE
+IIT Observer
+JONATHAN AIRHART
+16:00L / 16:30L
+DBRF
+CA
+JASON WILLIAMS
+FO
+DENNIS HARRUP
+INSTR
+MATT WADE
+IIT Observer
+JONATHAN AIRHART
+08Apr26
+09:30L / 10:00L
+IIT BRF
+IIT
+JONATHAN AIRHART
+10:00L / 12:00L
+BRF
+CA
+JASON WILLIAMS
+FO
+DENNIS HARRUP
+INSTR
+JOHN BOOKAS
+IIT Observer
+JONATHAN AIRHART
+12:00L / 16:00L
+OPS 2
+B76S5
+CA
+JASON WILLIAMS
+FO
+DENNIS HARRUP
+INSTR
+JOHN BOOKAS
+IIT Observer
+JONATHAN AIRHART
+12:00L / 16:00L
+IIT OPS 2 OBS
+IIT
+JONATHAN AIRHART
+16:00L / 16:30L
+DBRF
+CA
+JASON WILLIAMS
+FO
+DENNIS HARRUP
+INSTR
+JOHN BOOKAS
+IIT Observer
+JONATHAN AIRHART"""
+
+
+def test_parse_schedule_accepts_day_headers_or_bare_dates():
+    with_day_headers = parse_schedule(SAMPLE_WITH_DAY_HEADERS, ["Jonathan Airhart"])
+    without_day_headers = parse_schedule(SAMPLE_WITHOUT_DAY_HEADERS, ["Jonathan Airhart"])
+
+    assert with_day_headers == without_day_headers
+    assert [event[0] for event in with_day_headers] == ["IIT BRF", "OPS 1", "IIT BRF", "OPS 2"]
+
+    ops_1 = with_day_headers[1]
+    assert ops_1[1] == "07Apr26"
+    assert ops_1[2] == "10:00L"
+    assert ops_1[3] == "16:30L"
+    assert ops_1[4] == "B76S5"
+    assert "JASON WILLIAMS" in ops_1[5]
+    assert "JONATHAN AIRHART" not in ops_1[5]
+
+
+def test_excluding_one_person_does_not_drop_partial_name_matches():
+    sample_text = """Tue
+07Apr26
+10:00L / 12:00L
+OPS 1
+B76S5
+CA
+JOHN WADE
+FO
+MATT WADE
+INSTR
+JANE SMITH"""
+
+    events = parse_schedule(sample_text, ["John Wade"])
+
     assert len(events) == 1
-
-    activity, date, start, end, location, crew = events[0]
-
-    # ✅ Verify fields
-    assert activity == "AST 1"
-    assert date == "28Aug25"
-    assert start == "06:00L"
-    assert end == "12:30L"
-    assert "B76FPT1" in location
-
-    # ✅ Check crew contains both CA and FO
-    assert "PAUL TIMMS" in crew
-    assert "DEAN TOMLINSON" in crew
+    crew = events[0][5]
+    assert "JOHN WADE" not in crew
+    assert "MATT WADE" in crew
+    assert "JANE SMITH" in crew
 
 def test_timezone_support():
     """Test the new timezone support in generate_ics"""
