@@ -205,7 +205,7 @@ JANE SMITH"""
     assert "JANE SMITH" in crew
 
 def test_timezone_support():
-    """Test the new timezone support in generate_ics"""
+    """ICS output should preserve Memphis local time with an explicit TZID."""
     sample_text = """Mon
 06Aug25
 07:00L / 08:00L
@@ -215,10 +215,14 @@ B76FPT1"""
     events = parse_schedule(sample_text, [])
     assert len(events) == 1
 
-    # Test default timezone
     filename, cal = generate_ics(events)
+    ics_text = cal.serialize()
+
     assert filename.endswith('.ics')
-    
-    # Test custom timezone
-    filename_utc, cal_utc = generate_ics(events, tz_str="UTC", export_utc=True)
-    assert filename_utc.endswith('.ics')
+    assert "X-WR-TIMEZONE:America/Chicago" in ics_text
+    assert "BEGIN:VTIMEZONE" in ics_text
+    assert "TZID:America/Chicago" in ics_text
+    assert "DTSTART;TZID=America/Chicago:20250806T070000" in ics_text
+    assert "DTEND;TZID=America/Chicago:20250806T080000" in ics_text
+    assert "DTSTART:20250806T120000Z" not in ics_text
+    assert "DTEND:20250806T130000Z" not in ics_text

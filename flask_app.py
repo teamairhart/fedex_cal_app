@@ -8,11 +8,6 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key')
 
 @app.route('/')
 def index():
-    # NOTE: Ensure your templates/index.html exists and includes fields:
-    #  - textarea name="schedule_text"
-    #  - input name="exclude_names"
-    #  - optional select name="timezone" (defaults to America/Chicago)
-    #  - optional checkbox name="export_utc"
     return render_template('index.html')
 
 @app.route('/convert', methods=['POST'])
@@ -20,8 +15,6 @@ def convert_schedule():
     try:
         schedule_text = (request.form.get('schedule_text') or '').strip()
         exclude_names = (request.form.get('exclude_names') or '').strip()
-        tz_str = (request.form.get('timezone') or DEFAULT_TZ).strip()
-        export_utc = bool(request.form.get('export_utc'))  # checkbox → 'on' present
 
         if not schedule_text:
             return jsonify({'error': 'Please provide schedule text'}), 400
@@ -31,7 +24,7 @@ def convert_schedule():
         if not events:
             return jsonify({'error': 'No valid events found in the schedule. Please check your input.'}), 400
 
-        filename, calendar = generate_ics(events, tz_str=tz_str, export_utc=export_utc)
+        filename, calendar = generate_ics(events)
         ics_content = calendar.serialize()
 
         ics_file = io.BytesIO(ics_content.encode('utf-8'))
@@ -52,8 +45,6 @@ def preview_schedule():
     try:
         schedule_text = (request.form.get('schedule_text') or '').strip()
         exclude_names = (request.form.get('exclude_names') or '').strip()
-        tz_str = (request.form.get('timezone') or DEFAULT_TZ).strip()
-        export_utc = bool(request.form.get('export_utc'))
 
         if not schedule_text:
             return jsonify({'error': 'Please provide schedule text'}), 400
@@ -77,8 +68,8 @@ def preview_schedule():
         return jsonify({
             'success': True,
             'event_count': len(events),
-            'timezone': tz_str,
-            'export_utc': export_utc,
+            'timezone': DEFAULT_TZ,
+            'export_utc': False,
             'events': formatted_events
         })
 

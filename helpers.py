@@ -1,9 +1,9 @@
 import re
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from hashlib import sha1
 from typing import List, Tuple, Optional
-from ics import Calendar, Event
 
 # ------------------------------
 # Defaults
@@ -61,6 +61,14 @@ def is_date_header(text: str) -> bool:
 
 def is_time_range(text: str) -> bool:
     return bool(text and TIME_RANGE_RE.match(text.strip()))
+
+
+@dataclass(frozen=True)
+class SerializedCalendar:
+    content: str
+
+    def serialize(self) -> str:
+        return self.content
 
 
 def is_location(text: str) -> bool:
@@ -261,29 +269,85 @@ def group_brf_dbrf_events(
 # ICS generation
 # ------------------------------
 
+VTIMEZONE_CHICAGO = [
+    "BEGIN:VTIMEZONE",
+    "TZID:America/Chicago",
+    "X-LIC-LOCATION:America/Chicago",
+    "BEGIN:DAYLIGHT",
+    "TZOFFSETFROM:-0600",
+    "TZOFFSETTO:-0500",
+    "TZNAME:CDT",
+    "DTSTART:19700308T020000",
+    "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU",
+    "END:DAYLIGHT",
+    "BEGIN:STANDARD",
+    "TZOFFSETFROM:-0500",
+    "TZOFFSETTO:-0600",
+    "TZNAME:CST",
+    "DTSTART:19701101T020000",
+    "RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU",
+    "END:STANDARD",
+    "END:VTIMEZONE",
+]
+
+
+def _format_ics_text(value: str) -> str:
+    return (
+        value.replace("\\", "\\\\")
+        .replace("\r\n", "\n")
+        .replace("\r", "\n")
+        .replace("\n", "\\n")
+        .replace(",", "\\,")
+        .replace(";", "\\;")
+    )
+
+
+def _format_utc_stamp(value: datetime) -> str:
+    return value.astimezone(ZoneInfo("UTC")).strftime("%Y%m%dT%H%M%SZ")
+
+
+def _format_central_stamp(value: datetime) -> str:
+    return value.astimezone(ZoneInfo(DEFAULT_TZ)).strftime("%Y%m%dT%H%M%S")
+
+
+def _fold_ics_line(line: str, limit: int = 75) -> List[str]:
+    if len(line) <= limit:
+        return [line]
+
+    folded = []
+    remaining = line
+    while len(remaining) > limit:
+        folded.append(remaining[:limit])
+        remaining = " " + remaining[limit:]
+    folded.append(remaining)
+    return folded
+
 def generate_ics(
     events: List[Tuple[str, str, str, str, str, str]],
     tz_str: str = DEFAULT_TZ,
     export_utc: bool = False,
-) -> Tuple[str, Calendar]:
-    """Generate an ICS Calendar. Returns (filename, Calendar)."""
+) -> Tuple[str, SerializedCalendar]:
+    """Generate an ICS calendar encoded in Memphis local time."""
     if not events:
         raise ValueError("No events provided")
 
-    cal = Calendar()
-    cal.creator = "fdx-cal-app 1.0"
-
-    # Helpful calendar metadata for Apple/Google/Outlook (best-effort)
-    try:
-        from ics.grammar.parse import ContentLine
-        cal.extra.append(ContentLine(name="X-WR-CALNAME", value="FedEx Training Schedule"))
-        cal.extra.append(ContentLine(name="X-WR-TIMEZONE", value=("UTC" if export_utc else tz_str)))
-        cal.extra.append(ContentLine(name="X-PUBLISHED-TTL", value="PT1H"))
-    except Exception:
-        pass
+    # The source schedule is always listed in Memphis local time.
+    tz_str = DEFAULT_TZ
 
     starts_dt = []
     ends_dt = []
+    now_utc = datetime.now(tz=ZoneInfo("UTC"))
+    calendar_lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//fdx-cal-app//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "X-WR-CALNAME:FedEx Training Schedule",
+        f"X-WR-TIMEZONE:{DEFAULT_TZ}",
+        "X-PUBLISHED-TTL:PT1H",
+        *VTIMEZONE_CHICAGO,
+    ]
 
     for activity, date_str, start_str, end_str, location, notes in events:
         start_dt = parse_datetime(date_str, start_str, tz_str)
@@ -291,29 +355,26 @@ def generate_ics(
         if end_dt <= start_dt:
             end_dt += timedelta(days=1)  # handle cross-midnight
 
-        # Optional UTC export for maximum interop
-        if export_utc:
-            start_out = start_dt.astimezone(ZoneInfo("UTC"))
-            end_out = end_dt.astimezone(ZoneInfo("UTC"))
-        else:
-            start_out = start_dt
-            end_out = end_dt
-
-        e = Event()
-        e.name = activity
-        e.begin = start_out
-        e.end = end_out
-        e.location = location
-        e.description = notes
-
         # Stable UID → re-import updates instead of duplicates
         uid_key = f"{activity}|{start_dt.isoformat()}|{end_dt.isoformat()}|{location}"
-        e.uid = sha1(uid_key.encode()).hexdigest() + "@fdx-cal-app"
-        now_utc = datetime.now(tz=ZoneInfo("UTC"))
-        e.created = now_utc
-        e.last_modified = now_utc
+        uid = sha1(uid_key.encode()).hexdigest() + "@fdx-cal-app"
 
-        cal.events.add(e)
+        event_lines = [
+            "BEGIN:VEVENT",
+            f"UID:{uid}",
+            f"DTSTAMP:{_format_utc_stamp(now_utc)}",
+            f"CREATED:{_format_utc_stamp(now_utc)}",
+            f"LAST-MODIFIED:{_format_utc_stamp(now_utc)}",
+            f"DTSTART;TZID={DEFAULT_TZ}:{_format_central_stamp(start_dt)}",
+            f"DTEND;TZID={DEFAULT_TZ}:{_format_central_stamp(end_dt)}",
+            f"SUMMARY:{_format_ics_text(activity)}",
+        ]
+        if location:
+            event_lines.append(f"LOCATION:{_format_ics_text(location)}")
+        if notes:
+            event_lines.append(f"DESCRIPTION:{_format_ics_text(notes)}")
+        event_lines.append("END:VEVENT")
+        calendar_lines.extend(event_lines)
 
         starts_dt.append(start_dt)
         ends_dt.append(end_dt)
@@ -325,4 +386,14 @@ def generate_ics(
     else:
         month_str = f"{first:%Y-%m}_to_{last:%Y-%m}"
     filename = f"training_schedule_{month_str}.ics"
-    return filename, cal
+    calendar_lines.append("END:VCALENDAR")
+
+    serialized_lines = []
+    for line in calendar_lines:
+        serialized_lines.extend(_fold_ics_line(line))
+
+    if export_utc:
+        # Kept for backward compatibility, but intentionally ignored.
+        pass
+
+    return filename, SerializedCalendar("\r\n".join(serialized_lines) + "\r\n")
