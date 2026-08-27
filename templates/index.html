@@ -28,7 +28,7 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
             color: var(--ink);
-            line-height: 1.55;
+            line-height: 1.5;
             min-height: 100vh;
         }
 
@@ -36,41 +36,38 @@
         .hero {
             background: linear-gradient(130deg, #3a0d6e 0%, var(--purple) 55%, var(--purple-soft) 100%);
             color: #fff;
-            padding: 44px 20px 76px;
+            padding: 22px 20px 48px;
+            text-align: center;
         }
 
-        .hero-inner { max-width: 760px; margin: 0 auto; }
+        .hero-inner { max-width: 860px; margin: 0 auto; }
 
         .hero-badge {
             display: inline-block;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             background: rgba(255,255,255,0.14);
             border: 1px solid rgba(255,255,255,0.25);
-            padding: 5px 12px;
+            padding: 3px 10px;
             border-radius: 999px;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
         }
 
         .hero h1 {
-            font-size: clamp(1.7rem, 4vw, 2.4rem);
+            font-size: clamp(1.35rem, 3vw, 1.7rem);
             font-weight: 800;
             letter-spacing: -0.02em;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
-        .hero p {
-            max-width: 560px;
-            color: rgba(255,255,255,0.85);
-            font-size: 1.02rem;
-        }
+        .hero p { color: rgba(255,255,255,0.88); font-size: 0.93rem; }
 
         /* ---------- Layout ---------- */
         .container {
-            max-width: 760px;
-            margin: -40px auto 40px;
+            max-width: 860px;
+            margin: -28px auto 28px;
             padding: 0 20px;
         }
 
@@ -79,182 +76,249 @@
             border: 1px solid var(--line);
             border-radius: var(--radius);
             box-shadow: 0 6px 24px rgba(28, 27, 34, 0.06);
-            padding: 26px 28px;
-            margin-bottom: 18px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+        }
+
+        .step-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .step-row .card { margin-bottom: 0; }
+
+        .step-row .step-body { margin-left: 0; margin-top: 6px; }
+
+        .preview-scroll { max-height: 420px; overflow-y: auto; }
+
+        @media (max-width: 560px) {
+            .step-row { grid-template-columns: 1fr; }
         }
 
         .step-head {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 4px;
         }
 
         .step-num {
             flex: none;
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             background: var(--purple);
             color: #fff;
-            font-size: 14px;
-            font-weight: 700;
+            font-size: 0.9rem;
+            font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .step-head h2 { font-size: 1.12rem; font-weight: 700; letter-spacing: -0.01em; }
+        .step-head h2 {
+            font-size: 1.02rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
 
-        .hint { color: var(--muted); font-size: 0.88rem; }
+        .step-body { margin-left: 36px; }
 
-        /* ---------- Tabs ---------- */
-        .tabs {
-            display: flex;
-            gap: 6px;
-            background: var(--bg);
+        .step-body p.lead { font-size: 0.92rem; margin-bottom: 8px; }
+
+        .hint { color: var(--muted); font-size: 0.82rem; }
+
+        strong.ui { color: var(--purple); }
+
+        .shot {
+            display: block;
+            max-width: min(100%, 280px);
             border: 1px solid var(--line);
-            border-radius: 10px;
-            padding: 4px;
-            margin-bottom: 16px;
-        }
-
-        .tab {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font: inherit;
-            font-weight: 600;
-            font-size: 0.94rem;
-            color: var(--muted);
-            padding: 9px 12px;
             border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.15s, color 0.15s;
+            box-shadow: 0 3px 12px rgba(28,27,34,0.12);
+            margin-top: 8px;
         }
 
-        .tab.active {
-            background: #fff;
-            color: var(--purple);
-            box-shadow: 0 1px 4px rgba(28,27,34,0.10);
-        }
-
-        /* ---------- Upload / drop zone ---------- */
+        /* ---------- Upload ---------- */
         .drop-zone {
             border: 2px dashed #cfc8e2;
-            border-radius: 12px;
+            border-radius: 10px;
             background: #faf9fd;
-            padding: 30px 20px;
+            padding: 14px 16px;
             text-align: center;
+            margin-top: 4px;
             transition: border-color 0.15s, background 0.15s;
         }
 
-        .drop-zone .drop-icon { font-size: 1.8rem; margin-bottom: 8px; }
+        .drop-zone p { font-size: 0.92rem; margin-bottom: 8px; }
 
-        .drop-zone p { margin-bottom: 4px; }
-
-        .link-btn {
+        .btn-choose {
             border: none;
-            background: none;
+            background: var(--purple);
+            color: #fff;
             font: inherit;
-            font-weight: 600;
-            color: var(--purple);
-            text-decoration: underline;
+            font-size: 0.92rem;
+            font-weight: 700;
+            padding: 9px 20px;
+            border-radius: 9px;
             cursor: pointer;
-            padding: 0;
+            box-shadow: 0 3px 10px rgba(77, 20, 140, 0.25);
         }
+
+        .btn-choose:hover { background: #3f0f75; }
 
         .file-chip {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-top: 12px;
-            background: #f1ecfa;
-            border: 1px solid #ddd0f0;
-            color: var(--purple);
+            margin-top: 10px;
+            background: #e9f6ef;
+            border: 1px solid #c4e6d4;
+            color: var(--green);
             font-weight: 600;
-            font-size: 0.92rem;
-            border-radius: 10px;
-            padding: 10px 14px;
+            font-size: 0.88rem;
+            border-radius: 9px;
+            padding: 9px 12px;
         }
 
         .file-chip button {
             margin-left: auto;
             border: none;
             background: none;
-            color: var(--purple);
+            color: var(--green);
             font-size: 1rem;
             cursor: pointer;
             line-height: 1;
         }
 
-        textarea {
+        .name-row { margin-top: 12px; }
+
+        .name-row label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+
+        input[type="text"] {
             width: 100%;
-            height: 210px;
-            padding: 14px;
+            padding: 9px 12px;
             border: 1.5px solid var(--line);
-            border-radius: 10px;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-            font-size: 0.86rem;
-            resize: vertical;
-            background: #faf9fd;
+            border-radius: 9px;
+            font: inherit;
+            font-size: 0.92rem;
         }
 
-        textarea:focus, input[type="text"]:focus {
+        input[type="text"]:focus, textarea:focus {
             outline: none;
             border-color: var(--purple);
             box-shadow: 0 0 0 3px rgba(77, 20, 140, 0.12);
         }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1.5px solid var(--line);
-            border-radius: 10px;
-            font: inherit;
-            font-size: 0.95rem;
+        /* ---------- Preview ---------- */
+        .preview-empty {
+            text-align: center;
+            color: var(--muted);
+            padding: 12px 10px;
+            border: 1.5px dashed var(--line);
+            border-radius: 9px;
+            font-size: 0.88rem;
         }
 
-        /* ---------- Actions ---------- */
-        .button-row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .summary-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
 
-        .btn {
-            flex: 1;
-            min-width: 190px;
+        .summary-bar .count { font-weight: 800; font-size: 1.05rem; }
+
+        .pill {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 4px 11px;
+            border-radius: 999px;
+            background: #f1ecfa;
+            color: var(--purple);
+            border: 1px solid #ddd0f0;
+        }
+
+        .pill.orange { background: #fff0e5; color: #c2410c; border-color: #fdd5b4; }
+
+        .event-card {
+            display: flex;
+            gap: 12px;
+            border: 1px solid var(--line);
             border-radius: 10px;
-            padding: 14px 22px;
-            font: inherit;
-            font-size: 1rem;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: #fff;
+        }
+
+        .date-block {
+            flex: none;
+            width: 52px;
+            text-align: center;
+            align-self: flex-start;
+            background: #faf9fd;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 5px 3px;
+        }
+
+        .date-block .dow {
+            font-size: 0.62rem;
             font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.15s, background 0.15s;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--orange);
         }
 
-        .btn:active { transform: translateY(1px); }
+        .date-block .dom { font-size: 1.05rem; font-weight: 800; line-height: 1.1; }
+        .date-block .mon { font-size: 0.66rem; font-weight: 600; color: var(--muted); }
 
-        .btn-primary {
+        .event-body { flex: 1; min-width: 0; }
+        .event-title { font-weight: 700; font-size: 0.94rem; margin-bottom: 1px; }
+        .event-meta { color: var(--muted); font-size: 0.8rem; margin-bottom: 6px; }
+        .event-meta .loc { color: var(--purple); font-weight: 600; }
+
+        .crew {
+            background: #faf9fd;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: 0.78rem;
+        }
+
+        .crew-line { padding: 2px 0; }
+        .crew a { color: var(--purple); font-weight: 600; text-decoration: none; }
+        .crew a:hover { text-decoration: underline; }
+
+        /* ---------- Download ---------- */
+        .btn-download {
+            display: block;
+            width: 100%;
             border: none;
             background: var(--purple);
             color: #fff;
+            font: inherit;
+            font-size: 1rem;
+            font-weight: 800;
+            padding: 13px 20px;
+            border-radius: 10px;
+            cursor: pointer;
             box-shadow: 0 4px 14px rgba(77, 20, 140, 0.30);
+            transition: background 0.15s, transform 0.1s;
         }
 
-        .btn-primary:hover { background: #3f0f75; }
-
-        .btn-secondary {
-            border: 1.5px solid var(--purple);
-            background: #fff;
-            color: var(--purple);
-        }
-
-        .btn-secondary:hover { background: #f5f0fb; }
+        .btn-download:hover { background: #3f0f75; }
+        .btn-download:active { transform: translateY(1px); }
 
         /* ---------- Messages / loading ---------- */
         .msg {
-            margin-top: 16px;
-            padding: 13px 16px;
-            border-radius: 10px;
-            font-size: 0.94rem;
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 9px;
+            font-size: 0.88rem;
             font-weight: 500;
         }
 
@@ -274,81 +338,30 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ---------- Preview ---------- */
-        .summary-bar {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 18px;
-        }
+        /* ---------- Advanced (copy/paste) ---------- */
+        details.advanced { margin: 4px 0 18px; }
 
-        .summary-bar .count { font-weight: 800; font-size: 1.05rem; }
-
-        .pill {
-            font-size: 0.78rem;
+        details.advanced summary {
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 0.85rem;
             font-weight: 600;
-            padding: 4px 11px;
-            border-radius: 999px;
-            background: #f1ecfa;
-            color: var(--purple);
-            border: 1px solid #ddd0f0;
-        }
-
-        .pill.orange { background: #fff0e5; color: #c2410c; border-color: #fdd5b4; }
-
-        .event-card {
-            display: flex;
-            gap: 16px;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 16px 18px;
-            margin-bottom: 12px;
-            background: #fff;
-        }
-
-        .date-block {
-            flex: none;
-            width: 64px;
             text-align: center;
-            align-self: flex-start;
-            background: #faf9fd;
-            border: 1px solid var(--line);
+        }
+
+        details.advanced .card { margin-top: 10px; }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 14px;
+            border: 1.5px solid var(--line);
             border-radius: 10px;
-            padding: 8px 4px;
-        }
-
-        .date-block .dow {
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--orange);
-        }
-
-        .date-block .dom { font-size: 1.3rem; font-weight: 800; line-height: 1.15; }
-        .date-block .mon { font-size: 0.74rem; font-weight: 600; color: var(--muted); }
-
-        .event-body { flex: 1; min-width: 0; }
-
-        .event-title { font-weight: 700; font-size: 1.02rem; margin-bottom: 2px; }
-
-        .event-meta { color: var(--muted); font-size: 0.88rem; margin-bottom: 8px; }
-
-        .event-meta .loc { color: var(--purple); font-weight: 600; }
-
-        .crew {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.85rem;
+            resize: vertical;
             background: #faf9fd;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            padding: 10px 12px;
-            font-size: 0.86rem;
         }
-
-        .crew-line { padding: 2px 0; }
-
-        .crew a { color: var(--purple); font-weight: 600; text-decoration: none; }
-        .crew a:hover { text-decoration: underline; }
 
         /* ---------- Drag overlay ---------- */
         .drop-overlay {
@@ -376,12 +389,13 @@
         footer {
             text-align: center;
             color: var(--muted);
-            font-size: 0.82rem;
-            padding: 0 20px 34px;
+            font-size: 0.78rem;
+            padding: 0 20px 24px;
         }
 
         @media (max-width: 540px) {
             .card { padding: 20px 18px; }
+            .step-body { margin-left: 0; margin-top: 10px; }
             .event-card { flex-direction: column; gap: 10px; }
             .date-block { width: 100%; display: flex; gap: 8px; align-items: baseline; justify-content: center; }
         }
@@ -389,67 +403,92 @@
 </head>
 <body>
     <div class="drop-overlay" aria-hidden="true">
-        <div class="inner">📂 Drop your MINT CSV<br><span style="font-size:0.95rem; font-weight:500;">anywhere on this page</span></div>
+        <div class="inner">📂 Let go to add your schedule<br><span style="font-size:0.95rem; font-weight:500;">drop it anywhere on this page</span></div>
     </div>
 
     <header class="hero">
         <div class="hero-inner">
             <div class="hero-badge">✈️ FDX CAL</div>
-            <h1>Training Schedule → Calendar</h1>
-            <p>Turn a MINT export or your VIPS schedule page into an <strong>.ics</strong> file for Apple, Google, or Outlook calendars — with crew phone numbers built into every event.</p>
+            <h1>Put your training schedule on your calendar</h1>
+            <p>Five easy steps — about two minutes. Works with Apple, Google, and Outlook calendars, and every event includes the crew's phone numbers.</p>
         </div>
     </header>
 
     <main class="container">
+
+        <div class="step-row">
+            <section class="card">
+                <div class="step-head"><span class="step-num">1</span><h2>Open the report in MINT</h2></div>
+                <div class="step-body">
+                    <p class="lead">In MINT, click the report button and choose <strong class="ui">DAILY INSTRUCTIONAL EVENT/NOTES</strong>.</p>
+                    <img class="shot" src="/static/images/mint-step1-menu.png" alt="MINT report menu with DAILY INSTRUCTIONAL EVENT/NOTES highlighted">
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="step-head"><span class="step-num">2</span><h2>Download it as a CSV file</h2></div>
+                <div class="step-body">
+                    <p class="lead">Pick your date range, then click <strong class="ui">Download</strong> and choose <strong class="ui">CSV Document (*.csv)</strong>. It saves to your Downloads folder.</p>
+                    <img class="shot" style="max-width:min(100%,215px);" src="/static/images/mint-step2-csv.png" alt="MINT Download menu with CSV Document highlighted">
+                </div>
+            </section>
+        </div>
+
         <section class="card">
-            <div class="step-head"><span class="step-num">1</span><h2>Add your schedule</h2></div>
-
-            <div class="tabs" role="tablist">
-                <button class="tab active" id="tabUpload" type="button">📂 MINT CSV file</button>
-                <button class="tab" id="tabPaste" type="button">📋 Copy &amp; paste</button>
-            </div>
-
-            <div id="panelUpload">
+            <div class="step-head"><span class="step-num">3</span><h2>Add the file here</h2></div>
+            <div class="step-body">
                 <div class="drop-zone">
                     <input type="file" id="schedule_file" accept=".csv,.txt" hidden>
-                    <div class="drop-icon">⬇️</div>
-                    <p><strong>Drag &amp; drop</strong> the CSV anywhere on this page, or <button class="link-btn" id="browseBtn" type="button">browse for it</button></p>
-                    <p class="hint">In MINT, download the “Daily Instructional Event/Notes” report as a <strong>.csv</strong> — it includes everyone's phone numbers.</p>
+                    <p>⬇️ <strong>Drag the CSV file anywhere onto this page</strong>, or</p>
+                    <button class="btn-choose" id="browseBtn" type="button">Choose the file</button>
                 </div>
                 <div class="file-chip" id="fileChip" hidden>
-                    <span>📄</span><span id="fileName"></span>
+                    <span>✅</span><span id="fileName"></span>
                     <button id="clearFile" type="button" title="Remove file">✕</button>
                 </div>
+                <div class="name-row">
+                    <label for="exclude_names">Your name <span class="hint">(optional)</span></label>
+                    <input type="text" id="exclude_names" placeholder="e.g. Jonathan Airhart">
+                    <p class="hint" style="margin-top:6px;">We'll keep your own name off the crew notes — except when you're SUPPORT or an observer, so you can see you're not the one instructing.</p>
+                </div>
             </div>
+        </section>
 
-            <div id="panelPaste" hidden>
-                <textarea id="schedule_text" placeholder="On your VIPS schedule page: Ctrl+A, Ctrl+C (⌘A, ⌘C on Mac), then paste everything here — no cleanup needed."></textarea>
+        <div class="step-row">
+            <section class="card">
+                <div class="step-head"><span class="step-num">4</span><h2>Check your events</h2></div>
+                <div class="step-body">
+                    <div class="preview-empty" id="previewEmpty">Your events will appear here automatically after you add the file in Step&nbsp;3.</div>
+                    <div id="previewFilled" hidden>
+                        <div class="summary-bar" id="summaryBar"></div>
+                        <div id="previewContent" class="preview-scroll"></div>
+                    </div>
+                    <div class="loading" id="loading"><div class="spinner"></div><span>Reading your schedule…</span></div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="step-head"><span class="step-num">5</span><h2>Download your calendar</h2></div>
+                <div class="step-body">
+                    <button class="btn-download" id="downloadBtn" type="button">📥 Download my calendar (.ics)</button>
+                    <p class="hint" style="margin-top:12px;">Open the downloaded file and your phone or computer will offer to add the events to your calendar. On an iPhone, you can also email or AirDrop the file to yourself and tap it.</p>
+                    <div id="messages"></div>
+                </div>
+            </section>
+        </div>
+
+        <details class="advanced">
+            <summary>No CSV file? Use the old copy &amp; paste method instead</summary>
+            <div class="card">
+                <p class="lead" style="margin-bottom:10px;">On your VIPS schedule webpage press <strong class="ui">Ctrl+A</strong> then <strong class="ui">Ctrl+C</strong> (⌘A then ⌘C on a Mac), paste everything below, then use the buttons above.</p>
+                <textarea id="schedule_text" placeholder="Paste your schedule here — no cleanup needed."></textarea>
+                <button class="btn-choose" style="margin-top:12px;" id="pastePreviewBtn" type="button">Preview pasted schedule</button>
             </div>
-        </section>
+        </details>
 
-        <section class="card">
-            <div class="step-head"><span class="step-num">2</span><h2>Your name <span class="hint" style="font-weight:500;">(optional)</span></h2></div>
-            <input type="text" id="exclude_names" placeholder="e.g. Jonathan Airhart — add more names comma-separated">
-            <p class="hint" style="margin-top:10px;">We leave you off each event's crew notes so your own name isn't on everything. Exception: when you're in a <strong>SUPPORT</strong> or observer role you stay listed, so you can see at a glance that you're not the one instructing.</p>
-        </section>
-
-        <section class="card">
-            <div class="step-head"><span class="step-num">3</span><h2>Preview &amp; download</h2></div>
-            <div class="button-row">
-                <button class="btn btn-secondary" id="previewBtn" type="button">👁️ Preview events</button>
-                <button class="btn btn-primary" id="downloadBtn" type="button">📥 Download .ics file</button>
-            </div>
-            <div class="loading" id="loading"><div class="spinner"></div><span>Reading your schedule…</span></div>
-            <div id="messages"></div>
-        </section>
-
-        <section class="card" id="previewSection" hidden>
-            <div class="summary-bar" id="summaryBar"></div>
-            <div id="previewContent"></div>
-        </section>
     </main>
 
-    <footer>Times are Memphis local (Central). Your schedule is processed in memory and never stored.</footer>
+    <footer>Times are Memphis local (Central). Your schedule is processed in memory and never stored.<br>Not affiliated with or endorsed by FedEx.</footer>
 
     <script>
         const $ = id => document.getElementById(id);
@@ -463,7 +502,6 @@
         }
 
         function parseAppDate(str) {
-            // "27Aug26" -> Date; returns null if it doesn't match
             const m = /^(\d{2})([A-Za-z]{3})(\d{2})$/.exec(str || '');
             if (!m || !(m[2] in MONTHS)) return null;
             return new Date(2000 + Number(m[3]), MONTHS[m[2]], Number(m[1]));
@@ -475,23 +513,12 @@
                 .replace(/\b011\+?([\d-]{8,})/g, (m, rest) => `<a href="tel:+${rest.replace(/\D/g,'')}">${m}</a>`);
         }
 
-        // ---------- Tabs ----------
-        function selectTab(which) {
-            const upload = which === 'upload';
-            $('tabUpload').classList.toggle('active', upload);
-            $('tabPaste').classList.toggle('active', !upload);
-            $('panelUpload').hidden = !upload;
-            $('panelPaste').hidden = upload;
-        }
-        $('tabUpload').addEventListener('click', () => selectTab('upload'));
-        $('tabPaste').addEventListener('click', () => selectTab('paste'));
-
         // ---------- File handling ----------
         $('browseBtn').addEventListener('click', () => $('schedule_file').click());
 
         $('schedule_file').addEventListener('change', () => {
             const f = $('schedule_file').files[0];
-            if (f) setFileChip(f.name);
+            if (f) { setFileChip(f.name); previewSchedule(); }
         });
 
         function setFileChip(name) {
@@ -502,14 +529,14 @@
         $('clearFile').addEventListener('click', () => {
             $('schedule_file').value = '';
             $('fileChip').hidden = true;
-            $('previewSection').hidden = true;
+            $('previewFilled').hidden = true;
+            $('previewEmpty').hidden = false;
             $('messages').innerHTML = '';
         });
 
         // ---------- Messages / loading ----------
         function showLoading() {
             $('loading').style.display = 'flex';
-            $('previewSection').hidden = true;
             $('messages').innerHTML = '';
         }
         function hideLoading() { $('loading').style.display = 'none'; }
@@ -533,7 +560,7 @@
 
         // ---------- Preview ----------
         async function previewSchedule() {
-            if (!hasInput()) { showMessage('Add a CSV file or paste your schedule first.'); return; }
+            if (!hasInput()) { showMessage('Add your CSV file in Step 3 first.'); return; }
             showLoading();
             try {
                 const response = await fetch('/preview', { method: 'POST', body: getFormData() });
@@ -543,7 +570,7 @@
                 displayPreview(data);
             } catch (err) {
                 hideLoading();
-                showMessage('Error connecting to server. Please try again.');
+                showMessage('Error connecting to the server. Please try again.');
             }
         }
 
@@ -551,9 +578,8 @@
             const first = parseAppDate(data.events[0]?.date);
             const last = parseAppDate(data.events[data.events.length - 1]?.date);
             const fmtRange = d => d ? d.toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-            let summary = `<span class="count">✅ ${data.event_count} event${data.event_count === 1 ? '' : 's'}</span>`;
+            let summary = `<span class="count">✅ ${data.event_count} event${data.event_count === 1 ? '' : 's'} found</span>`;
             if (first && last) summary += `<span class="pill orange">${fmtRange(first)} – ${fmtRange(last)}</span>`;
-            if (data.format) summary += `<span class="pill">${escapeHtml(data.format)}</span>`;
             summary += `<span class="pill">Central time</span>`;
             $('summaryBar').innerHTML = summary;
 
@@ -580,13 +606,14 @@
                     </div>`;
             });
             $('previewContent').innerHTML = html;
-            $('previewSection').hidden = false;
-            showMessage(`Parsed ${data.event_count} events — scroll down to review, then download.`, 'success');
+            $('previewEmpty').hidden = true;
+            $('previewFilled').hidden = false;
+            document.querySelector('.summary-bar').scrollIntoView({behavior: 'smooth', block: 'center'});
         }
 
         // ---------- Download ----------
         async function downloadCalendar() {
-            if (!hasInput()) { showMessage('Add a CSV file or paste your schedule first.'); return; }
+            if (!hasInput()) { showMessage('Add your CSV file in Step 3 first.'); return; }
             showLoading();
             try {
                 const response = await fetch('/convert', { method: 'POST', body: getFormData() });
@@ -601,19 +628,19 @@
                     a.click();
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
-                    showMessage('Calendar downloaded — open it on your phone or double-click to import.', 'success');
+                    showMessage('✅ Calendar downloaded! Open the file and it will add the events to your calendar.', 'success');
                 } else {
                     const data = await response.json();
-                    showMessage(escapeHtml(data.error || 'Failed to generate calendar file'));
+                    showMessage(escapeHtml(data.error || 'Something went wrong creating the calendar file.'));
                 }
             } catch (err) {
                 hideLoading();
-                showMessage('Error connecting to server. Please try again.');
+                showMessage('Error connecting to the server. Please try again.');
             }
         }
 
-        $('previewBtn').addEventListener('click', previewSchedule);
         $('downloadBtn').addEventListener('click', downloadCalendar);
+        $('pastePreviewBtn').addEventListener('click', previewSchedule);
 
         // ---------- Drag & drop (whole page) ----------
         let dragDepth = 0;
@@ -638,7 +665,6 @@
             transfer.items.add(files[0]);
             $('schedule_file').files = transfer.files;
             setFileChip(files[0].name);
-            selectTab('upload');
             previewSchedule();
         });
 
