@@ -25,7 +25,7 @@ jobs:
 
       - name: Run parser tests
         run: |
-          pytest test_parser.py --maxfail=1 --disable-warnings -q
+          pytest --maxfail=1 --disable-warnings -q
 
       - name: Trigger Render Deployment
         if: success()  # ✅ Only deploy if tests pass

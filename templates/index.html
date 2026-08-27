@@ -3,369 +3,594 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FedEx Schedule to Calendar</title>
+    <title>FedEx Training Schedule → Calendar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --purple: #4D148C;
+            --purple-soft: #6d33b8;
+            --orange: #FF6600;
+            --ink: #1c1b22;
+            --muted: #6b7280;
+            --line: #e6e4ee;
+            --bg: #f6f5fa;
+            --card: #ffffff;
+            --green: #157347;
+            --red: #b02a37;
+            --radius: 14px;
         }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%), 
-                        url('/static/images/Fedex_767.jpeg') center/cover no-repeat fixed;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            line-height: 1.55;
             min-height: 100vh;
         }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background: white;
-            margin-top: 20px;
-            margin-bottom: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+
+        /* ---------- Hero ---------- */
+        .hero {
+            background: linear-gradient(130deg, #3a0d6e 0%, var(--purple) 55%, var(--purple-soft) 100%);
+            color: #fff;
+            padding: 44px 20px 76px;
         }
-        
-        h1 {
-            text-align: center;
-            color: #4D148C;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-        }
-        
-        .instructions {
-            background: #f8f9ff;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            border-left: 4px solid #4D148C;
-        }
-        
-        .instructions h3 {
-            color: #4D148C;
-            margin-bottom: 15px;
-        }
-        
-        .step {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #555;
-        }
-        
-        textarea, input[type="text"], input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        textarea:focus, input:focus {
-            outline: none;
-            border-color: #4D148C;
-        }
-        
-        textarea {
-            height: 200px;
-            resize: vertical;
-            font-family: monospace;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        button {
-            flex: 1;
-            padding: 15px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-preview {
-            background: #2196F3;
-            color: white;
-        }
-        
-        .btn-preview:hover {
-            background: #1976D2;
-            transform: translateY(-2px);
-        }
-        
-        .btn-download {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .btn-download:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-        }
-        
-        .preview-section {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9ff;
-            border-radius: 10px;
-            display: none;
-        }
-        
-        .preview-section.active {
-            display: block;
-        }
-        
-        .event-count {
-            background: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 25px;
+
+        .hero-inner { max-width: 760px; margin: 0 auto; }
+
+        .hero-badge {
             display: inline-block;
-            margin-bottom: 20px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 5px 12px;
+            border-radius: 999px;
+            margin-bottom: 16px;
         }
-        
-        .event-card {
-            background: white;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #4D148C;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+        .hero h1 {
+            font-size: clamp(1.7rem, 4vw, 2.4rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
         }
-        
-        .event-title {
-            font-weight: 600;
-            color: #4D148C;
-            font-size: 1.1em;
-            margin-bottom: 5px;
+
+        .hero p {
+            max-width: 560px;
+            color: rgba(255,255,255,0.85);
+            font-size: 1.02rem;
         }
-        
-        .event-details {
-            color: #666;
-            font-size: 0.9em;
+
+        /* ---------- Layout ---------- */
+        .container {
+            max-width: 760px;
+            margin: -40px auto 40px;
+            padding: 0 20px;
         }
-        
-        .crew-list {
-            margin-top: 10px;
-            padding: 10px;
-            background: #f5f5f5;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 0.85em;
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: 0 6px 24px rgba(28, 27, 34, 0.06);
+            padding: 26px 28px;
+            margin-bottom: 18px;
         }
-        
-        .error {
-            background: #ffebee;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #c62828;
-            margin: 20px 0;
+
+        .step-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
         }
-        
-        .success {
-            background: #e8f5e8;
-            color: #2e7d32;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #2e7d32;
-            margin: 20px 0;
-        }
-        
-        .sidebar {
-            background: #f5f5f5;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4D148C;
+
+        .step-num {
+            flex: none;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            background: var(--purple);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .step-head h2 { font-size: 1.12rem; font-weight: 700; letter-spacing: -0.01em; }
+
+        .hint { color: var(--muted); font-size: 0.88rem; }
+
+        /* ---------- Tabs ---------- */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font: inherit;
+            font-weight: 600;
+            font-size: 0.94rem;
+            color: var(--muted);
+            padding: 9px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .tab.active {
+            background: #fff;
+            color: var(--purple);
+            box-shadow: 0 1px 4px rgba(28,27,34,0.10);
+        }
+
+        /* ---------- Upload / drop zone ---------- */
+        .drop-zone {
+            border: 2px dashed #cfc8e2;
+            border-radius: 12px;
+            background: #faf9fd;
+            padding: 30px 20px;
+            text-align: center;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .drop-zone .drop-icon { font-size: 1.8rem; margin-bottom: 8px; }
+
+        .drop-zone p { margin-bottom: 4px; }
+
+        .link-btn {
+            border: none;
+            background: none;
+            font: inherit;
+            font-weight: 600;
+            color: var(--purple);
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .file-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            background: #f1ecfa;
+            border: 1px solid #ddd0f0;
+            color: var(--purple);
+            font-weight: 600;
+            font-size: 0.92rem;
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+
+        .file-chip button {
+            margin-left: auto;
+            border: none;
+            background: none;
+            color: var(--purple);
+            font-size: 1rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        textarea {
+            width: 100%;
+            height: 210px;
+            padding: 14px;
+            border: 1.5px solid var(--line);
+            border-radius: 10px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.86rem;
+            resize: vertical;
+            background: #faf9fd;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(77, 20, 140, 0.12);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--line);
+            border-radius: 10px;
+            font: inherit;
+            font-size: 0.95rem;
+        }
+
+        /* ---------- Actions ---------- */
+        .button-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .btn {
+            flex: 1;
+            min-width: 190px;
+            border-radius: 10px;
+            padding: 14px 22px;
+            font: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.15s, background 0.15s;
+        }
+
+        .btn:active { transform: translateY(1px); }
+
+        .btn-primary {
+            border: none;
+            background: var(--purple);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(77, 20, 140, 0.30);
+        }
+
+        .btn-primary:hover { background: #3f0f75; }
+
+        .btn-secondary {
+            border: 1.5px solid var(--purple);
+            background: #fff;
+            color: var(--purple);
+        }
+
+        .btn-secondary:hover { background: #f5f0fb; }
+
+        /* ---------- Messages / loading ---------- */
+        .msg {
+            margin-top: 16px;
+            padding: 13px 16px;
+            border-radius: 10px;
+            font-size: 0.94rem;
+            font-weight: 500;
+        }
+
+        .msg.error { background: #fdeef0; color: var(--red); border: 1px solid #f5c9cf; }
+        .msg.success { background: #e9f6ef; color: var(--green); border: 1px solid #c4e6d4; }
+
+        .loading { display: none; align-items: center; gap: 12px; margin-top: 16px; color: var(--muted); }
+
+        .spinner {
+            width: 22px;
+            height: 22px;
+            border: 3px solid var(--line);
+            border-top-color: var(--purple);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ---------- Preview ---------- */
+        .summary-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .summary-bar .count { font-weight: 800; font-size: 1.05rem; }
+
+        .pill {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 4px 11px;
+            border-radius: 999px;
+            background: #f1ecfa;
+            color: var(--purple);
+            border: 1px solid #ddd0f0;
+        }
+
+        .pill.orange { background: #fff0e5; color: #c2410c; border-color: #fdd5b4; }
+
+        .event-card {
+            display: flex;
+            gap: 16px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            background: #fff;
+        }
+
+        .date-block {
+            flex: none;
+            width: 64px;
+            text-align: center;
+            align-self: flex-start;
+            background: #faf9fd;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 8px 4px;
+        }
+
+        .date-block .dow {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--orange);
+        }
+
+        .date-block .dom { font-size: 1.3rem; font-weight: 800; line-height: 1.15; }
+        .date-block .mon { font-size: 0.74rem; font-weight: 600; color: var(--muted); }
+
+        .event-body { flex: 1; min-width: 0; }
+
+        .event-title { font-weight: 700; font-size: 1.02rem; margin-bottom: 2px; }
+
+        .event-meta { color: var(--muted); font-size: 0.88rem; margin-bottom: 8px; }
+
+        .event-meta .loc { color: var(--purple); font-weight: 600; }
+
+        .crew {
+            background: #faf9fd;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 0.86rem;
+        }
+
+        .crew-line { padding: 2px 0; }
+
+        .crew a { color: var(--purple); font-weight: 600; text-decoration: none; }
+        .crew a:hover { text-decoration: underline; }
+
+        /* ---------- Drag overlay ---------- */
+        .drop-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(77, 20, 140, 0.88);
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .drop-overlay .inner {
+            border: 3px dashed rgba(255,255,255,0.7);
+            border-radius: 18px;
+            padding: 46px 60px;
+            text-align: center;
+        }
+
+        body.dragging .drop-overlay { display: flex; }
+
+        footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.82rem;
+            padding: 0 20px 34px;
+        }
+
+        @media (max-width: 540px) {
+            .card { padding: 20px 18px; }
+            .event-card { flex-direction: column; gap: 10px; }
+            .date-block { width: 100%; display: flex; gap: 8px; align-items: baseline; justify-content: center; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📅 FedEx Training Schedule → iCalendar (.ics)</h1>
-        
-        <div class="instructions">
-            <h3>✈️ How to Use</h3>
-            <div class="step">1️⃣ Go to your FedEx schedule webpage.</div>
-            <div class="step">2️⃣ <strong>Ctrl+A → Ctrl+C</strong> to copy the entire schedule.</div>
-            <div class="step">3️⃣ Paste it below.</div>
-            <div class="step">4️⃣ Preview your events and download your <code>.ics</code> calendar file.</div>
-        </div>
-        
-        <div class="sidebar">
-            <div class="form-group">
-                <label for="exclude_names">Put your name here <strong>(FIRST AND LAST)</strong> if you do not want it added to the 'Crew Notes'<br>(can also exclude any other names, if desired, comma-separated):</label>
-                <input type="text" id="exclude_names" name="exclude_names" value="" placeholder="Your Name, Other Name, etc.">
-            </div>
-        </div>
-        
-        <form id="scheduleForm">
-            <div class="form-group">
-                <label for="schedule_text">📌 Paste schedule here (Ctrl+A → Ctrl+C from webpage)</label>
-                <textarea id="schedule_text" name="schedule_text" placeholder="Paste your FedEx schedule here..."></textarea>
-            </div>
-            
-            <div class="button-group">
-                <button type="button" class="btn-preview" onclick="previewSchedule()">👁️ Preview Events</button>
-                <button type="button" class="btn-download" onclick="downloadCalendar()">📥 Download ICS File</button>
-            </div>
-        </form>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Processing your schedule...</p>
-        </div>
-        
-        <div id="messages"></div>
-        
-        <div class="preview-section" id="previewSection">
-            <h3>📅 Event Preview</h3>
-            <div id="previewContent"></div>
-        </div>
+    <div class="drop-overlay" aria-hidden="true">
+        <div class="inner">📂 Drop your MINT CSV<br><span style="font-size:0.95rem; font-weight:500;">anywhere on this page</span></div>
     </div>
 
+    <header class="hero">
+        <div class="hero-inner">
+            <div class="hero-badge">✈️ FDX CAL</div>
+            <h1>Training Schedule → Calendar</h1>
+            <p>Turn a MINT export or your VIPS schedule page into an <strong>.ics</strong> file for Apple, Google, or Outlook calendars — with crew phone numbers built into every event.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <div class="step-head"><span class="step-num">1</span><h2>Add your schedule</h2></div>
+
+            <div class="tabs" role="tablist">
+                <button class="tab active" id="tabUpload" type="button">📂 MINT CSV file</button>
+                <button class="tab" id="tabPaste" type="button">📋 Copy &amp; paste</button>
+            </div>
+
+            <div id="panelUpload">
+                <div class="drop-zone">
+                    <input type="file" id="schedule_file" accept=".csv,.txt" hidden>
+                    <div class="drop-icon">⬇️</div>
+                    <p><strong>Drag &amp; drop</strong> the CSV anywhere on this page, or <button class="link-btn" id="browseBtn" type="button">browse for it</button></p>
+                    <p class="hint">In MINT, download the “Daily Instructional Event/Notes” report as a <strong>.csv</strong> — it includes everyone's phone numbers.</p>
+                </div>
+                <div class="file-chip" id="fileChip" hidden>
+                    <span>📄</span><span id="fileName"></span>
+                    <button id="clearFile" type="button" title="Remove file">✕</button>
+                </div>
+            </div>
+
+            <div id="panelPaste" hidden>
+                <textarea id="schedule_text" placeholder="On your VIPS schedule page: Ctrl+A, Ctrl+C (⌘A, ⌘C on Mac), then paste everything here — no cleanup needed."></textarea>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="step-head"><span class="step-num">2</span><h2>Your name <span class="hint" style="font-weight:500;">(optional)</span></h2></div>
+            <input type="text" id="exclude_names" placeholder="e.g. Jonathan Airhart — add more names comma-separated">
+            <p class="hint" style="margin-top:10px;">We leave you off each event's crew notes so your own name isn't on everything. Exception: when you're in a <strong>SUPPORT</strong> or observer role you stay listed, so you can see at a glance that you're not the one instructing.</p>
+        </section>
+
+        <section class="card">
+            <div class="step-head"><span class="step-num">3</span><h2>Preview &amp; download</h2></div>
+            <div class="button-row">
+                <button class="btn btn-secondary" id="previewBtn" type="button">👁️ Preview events</button>
+                <button class="btn btn-primary" id="downloadBtn" type="button">📥 Download .ics file</button>
+            </div>
+            <div class="loading" id="loading"><div class="spinner"></div><span>Reading your schedule…</span></div>
+            <div id="messages"></div>
+        </section>
+
+        <section class="card" id="previewSection" hidden>
+            <div class="summary-bar" id="summaryBar"></div>
+            <div id="previewContent"></div>
+        </section>
+    </main>
+
+    <footer>Times are Memphis local (Central). Your schedule is processed in memory and never stored.</footer>
+
     <script>
+        const $ = id => document.getElementById(id);
+        const MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+        const DOWS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text == null ? '' : String(text);
+            return div.innerHTML;
+        }
+
+        function parseAppDate(str) {
+            // "27Aug26" -> Date; returns null if it doesn't match
+            const m = /^(\d{2})([A-Za-z]{3})(\d{2})$/.exec(str || '');
+            if (!m || !(m[2] in MONTHS)) return null;
+            return new Date(2000 + Number(m[3]), MONTHS[m[2]], Number(m[1]));
+        }
+
+        function linkifyPhones(escapedLine) {
+            return escapedLine
+                .replace(/\((\d{3})\)\s(\d{3})-(\d{4})/g, '<a href="tel:+1$1$2$3">($1) $2-$3</a>')
+                .replace(/\b011\+?([\d-]{8,})/g, (m, rest) => `<a href="tel:+${rest.replace(/\D/g,'')}">${m}</a>`);
+        }
+
+        // ---------- Tabs ----------
+        function selectTab(which) {
+            const upload = which === 'upload';
+            $('tabUpload').classList.toggle('active', upload);
+            $('tabPaste').classList.toggle('active', !upload);
+            $('panelUpload').hidden = !upload;
+            $('panelPaste').hidden = upload;
+        }
+        $('tabUpload').addEventListener('click', () => selectTab('upload'));
+        $('tabPaste').addEventListener('click', () => selectTab('paste'));
+
+        // ---------- File handling ----------
+        $('browseBtn').addEventListener('click', () => $('schedule_file').click());
+
+        $('schedule_file').addEventListener('change', () => {
+            const f = $('schedule_file').files[0];
+            if (f) setFileChip(f.name);
+        });
+
+        function setFileChip(name) {
+            $('fileName').textContent = name;
+            $('fileChip').hidden = false;
+        }
+
+        $('clearFile').addEventListener('click', () => {
+            $('schedule_file').value = '';
+            $('fileChip').hidden = true;
+            $('previewSection').hidden = true;
+            $('messages').innerHTML = '';
+        });
+
+        // ---------- Messages / loading ----------
         function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('previewSection').classList.remove('active');
-            document.getElementById('messages').innerHTML = '';
+            $('loading').style.display = 'flex';
+            $('previewSection').hidden = true;
+            $('messages').innerHTML = '';
         }
-        
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-        
+        function hideLoading() { $('loading').style.display = 'none'; }
         function showMessage(message, type = 'error') {
-            const messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML = `<div class="${type}">${message}</div>`;
+            $('messages').innerHTML = `<div class="msg ${type}">${message}</div>`;
         }
-        
+
         function getFormData() {
             const formData = new FormData();
-            const scheduleText = document.getElementById('schedule_text').value;
-            const excludeNames = document.getElementById('exclude_names').value;
-            
-            formData.append('schedule_text', scheduleText);
-            formData.append('exclude_names', excludeNames);
-            
+            formData.append('schedule_text', $('schedule_text').value);
+            formData.append('exclude_names', $('exclude_names').value);
+            if ($('schedule_file').files.length > 0) {
+                formData.append('schedule_file', $('schedule_file').files[0]);
+            }
             return formData;
         }
-        
+
+        function hasInput() {
+            return $('schedule_file').files.length > 0 || $('schedule_text').value.trim().length > 0;
+        }
+
+        // ---------- Preview ----------
         async function previewSchedule() {
+            if (!hasInput()) { showMessage('Add a CSV file or paste your schedule first.'); return; }
             showLoading();
-            
             try {
-                const formData = getFormData();
-                const response = await fetch('/preview', {
-                    method: 'POST',
-                    body: formData
-                });
-                
+                const response = await fetch('/preview', { method: 'POST', body: getFormData() });
                 const data = await response.json();
                 hideLoading();
-                
-                if (data.error) {
-                    showMessage(data.error, 'error');
-                    return;
-                }
-                
+                if (data.error) { showMessage(escapeHtml(data.error)); return; }
                 displayPreview(data);
-                
-            } catch (error) {
+            } catch (err) {
                 hideLoading();
-                showMessage('Error connecting to server. Please try again.', 'error');
+                showMessage('Error connecting to server. Please try again.');
             }
         }
-        
+
         function displayPreview(data) {
-            const previewContent = document.getElementById('previewContent');
-            const previewSection = document.getElementById('previewSection');
-            
-            let html = `<div class="event-count">✅ Found ${data.event_count} event blocks!</div>`;
-            
+            const first = parseAppDate(data.events[0]?.date);
+            const last = parseAppDate(data.events[data.events.length - 1]?.date);
+            const fmtRange = d => d ? d.toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
+            let summary = `<span class="count">✅ ${data.event_count} event${data.event_count === 1 ? '' : 's'}</span>`;
+            if (first && last) summary += `<span class="pill orange">${fmtRange(first)} – ${fmtRange(last)}</span>`;
+            if (data.format) summary += `<span class="pill">${escapeHtml(data.format)}</span>`;
+            summary += `<span class="pill">Central time</span>`;
+            $('summaryBar').innerHTML = summary;
+
+            let html = '';
             data.events.forEach(event => {
+                const d = parseAppDate(event.date);
+                const dateBlock = d
+                    ? `<div class="dow">${DOWS[d.getDay()]}</div><div class="dom">${d.getDate()}</div><div class="mon">${d.toLocaleDateString('en-US',{month:'short'})} ${d.getFullYear()}</div>`
+                    : `<div class="dom" style="font-size:0.9rem;">${escapeHtml(event.date)}</div>`;
+                const crewHtml = event.crew.length > 0
+                    ? `<div class="crew">${event.crew.map(line => `<div class="crew-line">${linkifyPhones(escapeHtml(line))}</div>`).join('')}</div>`
+                    : '';
                 html += `
                     <div class="event-card">
-                        <div class="event-title">${event.activity}</div>
-                        <div class="event-details">
-                            <strong>Date:</strong> ${event.date} | 
-                            <strong>Time:</strong> ${event.start} → ${event.end} | 
-                            <strong>Location:</strong> ${event.location}
-                        </div>
-                        ${event.crew.length > 0 ? `
-                            <div class="crew-list">
-                                <strong>Crew:</strong><br>
-                                ${event.crew.join('<br>')}
+                        <div class="date-block">${dateBlock}</div>
+                        <div class="event-body">
+                            <div class="event-title">${escapeHtml(event.activity)}</div>
+                            <div class="event-meta">
+                                🕐 ${escapeHtml(event.start.replace('L',''))} – ${escapeHtml(event.end.replace('L',''))}
+                                ${event.location ? ` &nbsp;·&nbsp; <span class="loc">📍 ${escapeHtml(event.location)}</span>` : ''}
                             </div>
-                        ` : ''}
-                    </div>
-                `;
+                            ${crewHtml}
+                        </div>
+                    </div>`;
             });
-            
-            if (data.event_count > 5) {
-                html += `<p><em>Showing first 5 events. Total: ${data.event_count} events.</em></p>`;
-            }
-            
-            previewContent.innerHTML = html;
-            previewSection.classList.add('active');
-            showMessage(`Successfully parsed ${data.event_count} events!`, 'success');
+            $('previewContent').innerHTML = html;
+            $('previewSection').hidden = false;
+            showMessage(`Parsed ${data.event_count} events — scroll down to review, then download.`, 'success');
         }
-        
+
+        // ---------- Download ----------
         async function downloadCalendar() {
+            if (!hasInput()) { showMessage('Add a CSV file or paste your schedule first.'); return; }
             showLoading();
-            
             try {
-                const formData = getFormData();
-                const response = await fetch('/convert', {
-                    method: 'POST',
-                    body: formData
-                });
-                
+                const response = await fetch('/convert', { method: 'POST', body: getFormData() });
                 hideLoading();
-                
                 if (response.ok) {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
@@ -376,24 +601,54 @@
                     a.click();
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
-                    
-                    showMessage('Calendar file downloaded successfully!', 'success');
+                    showMessage('Calendar downloaded — open it on your phone or double-click to import.', 'success');
                 } else {
                     const data = await response.json();
-                    showMessage(data.error || 'Failed to generate calendar file', 'error');
+                    showMessage(escapeHtml(data.error || 'Failed to generate calendar file'));
                 }
-                
-            } catch (error) {
+            } catch (err) {
                 hideLoading();
-                showMessage('Error connecting to server. Please try again.', 'error');
+                showMessage('Error connecting to server. Please try again.');
             }
         }
-        
-        // Clear messages when user starts typing
-        document.getElementById('schedule_text').addEventListener('input', function(e) {
-            if (e.target.value.trim()) {
-                document.getElementById('messages').innerHTML = '';
-            }
+
+        $('previewBtn').addEventListener('click', previewSchedule);
+        $('downloadBtn').addEventListener('click', downloadCalendar);
+
+        // ---------- Drag & drop (whole page) ----------
+        let dragDepth = 0;
+        document.addEventListener('dragenter', e => {
+            e.preventDefault();
+            dragDepth++;
+            document.body.classList.add('dragging');
+        });
+        document.addEventListener('dragover', e => e.preventDefault());
+        document.addEventListener('dragleave', e => {
+            e.preventDefault();
+            dragDepth = Math.max(0, dragDepth - 1);
+            if (dragDepth === 0) document.body.classList.remove('dragging');
+        });
+        document.addEventListener('drop', e => {
+            e.preventDefault();
+            dragDepth = 0;
+            document.body.classList.remove('dragging');
+            const files = e.dataTransfer?.files;
+            if (!files || files.length === 0) return;
+            const transfer = new DataTransfer();
+            transfer.items.add(files[0]);
+            $('schedule_file').files = transfer.files;
+            setFileChip(files[0].name);
+            selectTab('upload');
+            previewSchedule();
+        });
+
+        // ---------- Remember "your name" between visits ----------
+        try {
+            const saved = localStorage.getItem('fdxcal_exclude');
+            if (saved) $('exclude_names').value = saved;
+        } catch (e) {}
+        $('exclude_names').addEventListener('input', e => {
+            try { localStorage.setItem('fdxcal_exclude', e.target.value); } catch (err) {}
         });
     </script>
 </body>
