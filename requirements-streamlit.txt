@@ -1,0 +1,4 @@
+# Legacy `streamlit run app.py` UI only; not used by any deployment.
+-r requirements.txt
+pandas>=2.0,<3
+streamlit>=1.30,<2

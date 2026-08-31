@@ -177,3 +177,15 @@ OPS 1;B76S5;3/8/26 8:00 AM;SMITH, ALEX (1000001);CA;(555) 111-2222
     lines = events[0][5].split("\n")
     assert "SUPPORT: B767 SUPPORT CA" in lines
     assert not any("OPEN" in line or "0000013" in line for line in lines)
+
+
+def test_event_cap_rejects_oversized_export():
+    from helpers import MAX_EVENTS, ScheduleTooLarge
+    import pytest
+
+    rows = "\n".join(
+        "CQGS;ROOM;3/8/26 8:00 AM;SMITH, ALEX (100000%d);FO;(555) 111-2222" % (i % 10)
+        for i in range(MAX_EVENTS + 5)
+    )
+    with pytest.raises(ScheduleTooLarge):
+        parse_mint_csv(HEADER + "\n" + rows)

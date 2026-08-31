@@ -1,6 +1,7 @@
-ics
-pandas
-streamlit
-flask
-gunicorn
-pytest
+# Production web app (Render uses gunicorn; the Mac Mini uses waitress).
+# Bounded to the current major versions so a future install can't silently
+# pull a breaking release. pandas/streamlit/ics are NOT needed by this path —
+# see requirements-streamlit.txt for the legacy Streamlit UI.
+flask>=3.0,<4
+gunicorn>=21.2,<24
+waitress>=3.0,<4

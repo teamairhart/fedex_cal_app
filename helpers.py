@@ -10,6 +10,15 @@ from typing import List, Tuple, Optional
 # ------------------------------
 DEFAULT_TZ = "America/Chicago"
 
+# Both parsers do some pairwise work per day (brief/debrief pairing, crew
+# de-duplication), so an unbounded event count is a CPU sink on a public
+# endpoint. A full year of real schedule is a few hundred events.
+MAX_EVENTS = 2000
+
+
+class ScheduleTooLarge(ValueError):
+    """Raised when input exceeds what these endpoints will process."""
+
 DAY_HEADER_RE = re.compile(r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)(day)?$", re.IGNORECASE)
 DATE_RE = re.compile(r"^\d{2}[A-Za-z]{3}\d{2}$")
 TIME_RANGE_RE = re.compile(r"^(\d{2}:\d{2}L)\s*/\s*(\d{2}:\d{2}L)$")
@@ -133,6 +142,11 @@ def parse_schedule(text: str, exclude_names: Optional[List[str]] = None) -> List
                 event, new_i = parse_single_event(lines, i, date, excluded_names)
                 if event:
                     day_events.append(event)
+                    if len(events) + len(day_events) > MAX_EVENTS:
+                        raise ScheduleTooLarge(
+                            "That schedule has more than %d events. "
+                            "Please export a shorter date range." % MAX_EVENTS
+                        )
                 i = new_i
             else:
                 i += 1

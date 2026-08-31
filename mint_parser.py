@@ -22,7 +22,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
-from helpers import _excluded_name_sets, _matches_excluded_name
+from helpers import MAX_EVENTS, ScheduleTooLarge, _excluded_name_sets, _matches_excluded_name
 
 MINT_HEADER_MARKER = "EVENT NAME;FACILITY;START"
 MINT_DATETIME_FMT = "%m/%d/%y %I:%M %p"
@@ -108,6 +108,11 @@ def _read_raw_events(text: str) -> List[Dict]:
                 facility = facility or current["facility"]
             current = {"name": ev_name, "facility": facility, "start": start_dt, "crew": []}
             events.append(current)
+            if len(events) > MAX_EVENTS:
+                raise ScheduleTooLarge(
+                    "That export has more than %d events. "
+                    "Please download a shorter date range." % MAX_EVENTS
+                )
             if person:
                 current["crew"].append((person, role, phone))
         elif not ev_name and not start and person and current is not None:

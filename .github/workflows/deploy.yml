@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -21,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
       - name: Run parser tests
         run: |
@@ -30,4 +33,5 @@ jobs:
       - name: Trigger Render Deployment
         if: success()  # ✅ Only deploy if tests pass
         run: |
-          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+          curl --fail-with-body --silent --show-error --retry 3 \
+               -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"

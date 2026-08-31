@@ -1,10 +1,23 @@
 from flask import Flask, render_template, request, send_file, jsonify
 import io
 import os
-from helpers import parse_schedule, generate_ics, DEFAULT_TZ
+from werkzeug.exceptions import RequestEntityTooLarge
+from helpers import parse_schedule, generate_ics, DEFAULT_TZ, ScheduleTooLarge
 from mint_parser import parse_mint_csv, looks_like_mint_csv
 
 app = Flask(__name__)
+
+# These endpoints are public and unauthenticated, so bound the work they accept.
+# A year of real MINT schedule is well under 100 KB; 2 MB is generous headroom.
+MAX_UPLOAD_BYTES = 2 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_BYTES
+
+@app.errorhandler(413)
+def too_large(_error):
+    return jsonify({
+        'error': 'That file is too large (limit %d MB). Export a shorter date range.'
+                 % (MAX_UPLOAD_BYTES // (1024 * 1024))
+    }), 413
 
 def get_schedule_text(req):
     """Uploaded file takes priority over pasted text."""
@@ -50,6 +63,10 @@ def convert_schedule():
             mimetype='text/calendar'
         )
 
+    except RequestEntityTooLarge:
+        raise
+    except ScheduleTooLarge as exc:
+        return jsonify({'error': str(exc)}), 400
     except Exception:
         app.logger.exception('convert failed')
         return jsonify({'error': 'Could not process that schedule. Please check the input format.'}), 400
@@ -87,6 +104,10 @@ def preview_schedule():
             'events': formatted_events
         })
 
+    except RequestEntityTooLarge:
+        raise
+    except ScheduleTooLarge as exc:
+        return jsonify({'error': str(exc)}), 400
     except Exception:
         app.logger.exception('preview failed')
         return jsonify({'error': 'Could not parse that schedule. Please check the input format.'}), 400
